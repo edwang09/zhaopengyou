@@ -1,0 +1,28 @@
+  
+version: '3.8'
+
+services:
+  frontend:
+    image: edwang09/zhaopengyou_frontend
+    build: 
+      context: ./frontend
+      args:
+        - REACT_APP_SERVICES_HOST=/api
+    ports:
+      - "80:80"
+    networks: 
+      - frontend
+      - backend
+    # command: nginx -s reload
+  backend:
+    image: edwang09/zhaopengyou_backend
+    build:
+      context: ./backend
+    ports:
+      - "3000:3000"
+    networks: 
+      - backend
+
+networks: 
+  frontend:
+  backend:
