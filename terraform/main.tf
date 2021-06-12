@@ -1,7 +1,13 @@
+variable "aws" {
+  access_key = string
+  secret_key = string
+}
+
+
 provider "aws" {
   region     = "us-east-1"
-  access_key = "AKIA2QDYKCAQBXRH3Y4S"
-  secret_key = "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"
+  access_key = var.aws.access_key
+  secret_key = var.aws.secret_key
 }
 
 terraform {
