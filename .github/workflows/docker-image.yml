@@ -16,7 +16,7 @@ jobs:
       run: cd frontend && npm install && npm run test
 
     - name: Backend test
-      run: cd .. && cd backend && npm install && npm run test
+      run: cd backend && npm install && npm run test
 
   sonarcloud:
     runs-on: ubuntu-latest
