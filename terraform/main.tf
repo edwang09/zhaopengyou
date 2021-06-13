@@ -1,13 +1,13 @@
-variable "aws" {
-  access_key = string
-  secret_key = string
+variable "access_key" {
+  
 }
-
-
+variable "secret_key" {
+  
+}
 provider "aws" {
   region     = "us-east-1"
-  access_key = var.aws.access_key
-  secret_key = var.aws.secret_key
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 
 terraform {
@@ -19,5 +19,4 @@ terraform {
 }
 resource "aws_s3_bucket" "terraform-test" {
     bucket = "zhaopengyou-terraform-test"
-  
 }

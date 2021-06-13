@@ -8,6 +8,9 @@ services:
       context: ./frontend
       args:
         - REACT_APP_SERVICES_HOST=/api
+    volumes: 
+      - ./frontend:/app
+    
     ports:
       - "80:80"
     networks: 
@@ -18,6 +21,9 @@ services:
     image: edwang09/zhaopengyou_backend
     build:
       context: ./backend
+    volumes: 
+      - ./backend:/app
+      - /app/node_modules
     ports:
       - "3000:3000"
     networks: 

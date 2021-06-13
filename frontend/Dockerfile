@@ -1,5 +1,5 @@
 #TODO: why do I need node?
-FROM node:16 as build
+FROM node:latest as build
 # ARG REACT_APP_SERVICES_HOST=/services/m
 
 WORKDIR /app

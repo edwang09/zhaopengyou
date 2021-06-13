@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { defaultStyle } from "./textstyle";
-import TextInput = require("pixi-text-input");
+// import TextInput = require("pixi-text-input");
 import { Button } from "./components/button";
 import { buttonColor } from "./enums/enums";
 import { IUserData } from "./interfaces/userdata";
@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class Register {
   container: PIXI.Container;
   app: PIXI.Application;
-  input: TextInput;
+  // input: TextInput;
   avatarIndex: number;
   callback;
   constructor(app: PIXI.Application) {
@@ -30,7 +30,7 @@ export class Register {
   init(): void {
     this.displayBackground();
     this.displayAvatarSelector();
-    this.displayInputBox();
+    // this.displayInputBox();
     this.displayButton();
   }
   show(cb:(user:IUserData)=>void): void {
@@ -90,41 +90,41 @@ export class Register {
     this.container.addChild(arrowright);
   }
 
-  displayInputBox(): void {
-    this.input = new TextInput({
-      input: {
-        fontSize: "25px",
-        padding: "10px",
-        width: "200px",
-        color: "#26272E",
-      },
-      box: {
-        default: {
-          fill: 0xe8e9f3,
-          rounded: 12,
-          stroke: { color: 0xcbcee0, width: 3 },
-        },
-        focused: {
-          fill: 0xe1e3ee,
-          rounded: 12,
-          stroke: { color: 0xabafc6, width: 3 },
-        },
-        disabled: { fill: 0xdbdbdb, rounded: 12 },
-      },
-    });
-    const label = new PIXI.Text("Name :", defaultStyle);
-    this.input.x = -110;
-    this.input.y = 0;
-    adjustToCenterOfContainer(label, -55, -30);
-    this.container.addChild(this.input);
-    this.container.addChild(label);
-  }
+  // displayInputBox(): void {
+  //   this.input = new TextInput({
+  //     input: {
+  //       fontSize: "25px",
+  //       padding: "10px",
+  //       width: "200px",
+  //       color: "#26272E",
+  //     },
+  //     box: {
+  //       default: {
+  //         fill: 0xe8e9f3,
+  //         rounded: 12,
+  //         stroke: { color: 0xcbcee0, width: 3 },
+  //       },
+  //       focused: {
+  //         fill: 0xe1e3ee,
+  //         rounded: 12,
+  //         stroke: { color: 0xabafc6, width: 3 },
+  //       },
+  //       disabled: { fill: 0xdbdbdb, rounded: 12 },
+  //     },
+  //   });
+  //   const label = new PIXI.Text("Name :", defaultStyle);
+  //   this.input.x = -110;
+  //   this.input.y = 0;
+  //   adjustToCenterOfContainer(label, -55, -30);
+  //   this.container.addChild(this.input);
+  //   this.container.addChild(label);
+  // }
 
   displayButton(): void {
 
     const button: PIXI.Sprite = new Button(buttonColor.GREEN,"Accept", ()=>{
       const userData : IUserData = {
-        name: this.input.text,
+        name: "this.input.text",
         avatarIndex: this.avatarIndex,
         id: this.randomString()
       }
