@@ -13,10 +13,10 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Frontend test
-      run: cd frontend && npm run test
-      
+      run: cd frontend && npm install && npm run test
+
     - name: Backend test
-      run: cd backend && npm run test
+      run: cd .. && cd backend && npm install && npm run test
 
   sonarcloud:
     runs-on: ubuntu-latest
