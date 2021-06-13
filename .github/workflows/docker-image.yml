@@ -29,6 +29,9 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     
     - name: Publish the Docker image
+      run: docker-compose build    
+
+    - name: Publish the Docker image
       run: docker-compose push
 
 
