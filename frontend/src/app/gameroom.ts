@@ -6,7 +6,7 @@ import { IUserData } from "./interfaces/userdata";
 import EventEmitter = require('eventemitter3');
 import { PlayerArea } from "./components/playerarea";
 import { Player, Room } from "./interfaces/ISocket";
-import { HUD_DIMENSION, OPTIONS, PLAYER_AREA, PLAYER_AREA_POSITION, TEST_CARDS, USER_HAND } from "./constants/dimension";
+import { HUD_DIMENSION, OPTIONS, PLAYER_AREA_POSITION, TEST_CARDS, USER_HAND } from "./constants/dimension";
 import { Options } from "./components/options";
 
 export class GameRoom {

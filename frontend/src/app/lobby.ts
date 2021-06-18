@@ -4,7 +4,7 @@ import {
   adjustToCenterOfContainer,
   addText,
 } from "./helpers/helper";
-import TextInput = require("pixi-text-input");
+// import TextInput = require("pixi-text-input");
 import { Button } from "./components/button";
 import { buttonColor } from "./enums/enums";
 import { subtitle, white } from "./textstyle";
@@ -14,7 +14,7 @@ export class Lobby {
   app: PIXI.Application;
   container: PIXI.Container;
   modal: PIXI.Sprite;
-  input: TextInput;
+  // input: TextInput;
   pageNumber: number;
   globalEventHandler: EventEmitter;
   roomList: Room[];

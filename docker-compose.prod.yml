@@ -1,0 +1,11 @@
+  
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context: ./frontend
+      target: prod
+      args:
+        - REACT_APP_SERVICES_HOST=/api
+  backend:

@@ -6,17 +6,20 @@ services:
     image: edwang09/zhaopengyou_frontend
     build: 
       context: ./frontend
+      target: dev
       args:
         - REACT_APP_SERVICES_HOST=/api
     volumes: 
       - ./frontend:/app
+      - /app/node_modules
     
     ports:
       - "80:80"
     networks: 
       - frontend
       - backend
-    # command: nginx -s reload
+    command: npm run start
+
   backend:
     image: edwang09/zhaopengyou_backend
     build:

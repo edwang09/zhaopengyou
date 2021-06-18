@@ -52,10 +52,10 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     
     - name: Publish the Docker image
-      run: docker-compose build    
+      run: make build   
 
     - name: Publish the Docker image
-      run: docker-compose push
+      run: make push
 
 
     - name: pull
