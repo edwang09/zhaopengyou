@@ -37,6 +37,6 @@ dev:
 dev-build:
 	docker-compose -f docker-compose.yml  -f docker-compose.dev.yml up --build
 build:
-	docker-compose -f docker-compose.yml docker-compose.prod.yml build
+	docker-compose build --build-arg ENV=prod
 push:
-	docker-compose -f docker-compose.yml docker-compose.prod.yml push
+	docker-compose push

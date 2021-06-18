@@ -6,7 +6,7 @@ services:
     image: edwang09/zhaopengyou_frontend
     build: 
       context: ./frontend
-      target: dev
+      target: ${ENV}
       args:
         - REACT_APP_SERVICES_HOST=/api
     volumes: 
