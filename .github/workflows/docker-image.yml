@@ -58,18 +58,18 @@ jobs:
       run: make push
 
 
-    - name: pull
-      run: |-
-        make pull
+    # - name: pull
+    #   run: |-
+    #     make pull
 
-    - name: clean
-      run: |-
-        make clean
+    # - name: clean
+    #   run: |-
+    #     make clean
         
-    - name: network
-      run: |-
-        make network
+    # - name: network
+    #   run: |-
+    #     make network
     
-    - name: run
-      run: |-
-        make run
+    # - name: run
+    #   run: |-
+    #     make run

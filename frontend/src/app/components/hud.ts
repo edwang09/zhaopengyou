@@ -35,6 +35,8 @@ export class Hud extends PIXI.Container {
     if (player) {
       this.avatar.updateAvatar(player.avatarIndex.toString())
       this.playername.update(player.name)
+      if(!this.level) this.level = new Level(this, player.level)
+      if(!this.camp) this.camp = new PlayerCamp(this, player.camp)
       this.level.updateLevel(player.level)
       this.camp.updateCamp(player.camp)
       this.level.visible = true
