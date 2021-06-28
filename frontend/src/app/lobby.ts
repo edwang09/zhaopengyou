@@ -1,142 +1,93 @@
 import * as PIXI from "pixi.js";
-import {
-  makeInteractive,
-  adjustToCenterOfContainer,
-  addText,
-} from "./helpers/helper";
-// import TextInput = require("pixi-text-input");
+import { makeInteractive, adjustToCenterOfContainer, addText, setPosition, renderSprite, renderContainer } from "./helpers/helper";
+import { TextInput } from "./components/textinput";
 import { Button } from "./components/button";
 import { buttonColor } from "./enums/enums";
 import { subtitle, white } from "./textstyle";
-import EventEmitter = require("eventemitter3");
-import { Room } from "./interfaces/ISocket";
-export class Lobby {
-  app: PIXI.Application;
-  container: PIXI.Container;
-  modal: PIXI.Sprite;
-  // input: TextInput;
+import { IRoom, ILobbyRoom } from "./interfaces/ISocket";
+import { GameApp } from "./app";
+import { ImageButton } from "./components/imageButton";
+export class Lobby extends PIXI.Container {
+  app: GameApp;
+  background: PIXI.Sprite;
+  input: TextInput;
   pageNumber: number;
-  globalEventHandler: EventEmitter;
-  roomList: Room[];
+  roomList: ILobbyRoom[];
   callback;
-  constructor(app: PIXI.Application, globalEventHandler: EventEmitter) {
+  pageTag: PIXI.Sprite;
+  arrowleft: ImageButton;
+  arrowright: ImageButton;
+  constructor(app: GameApp) {
+    super();
     this.app = app;
-    this.globalEventHandler = globalEventHandler;
     this.pageNumber = 1;
     this.roomList = [];
-    this.initializeContainer();
-    this.init();
-  }
-
-  init(): void {
+    this.visible = false;
+    this.interactive = true;
+    renderContainer(this, this.app.stage, this.app.view.width / 2, this.app.view.height / 2);
     this.displayBackground();
     this.displayNavigator();
     this.displayCreateButton();
+  }
+
+  displayBackground(): void {
+    this.background = PIXI.Sprite.from(PIXI.Loader.shared.resources["modal-wide"].texture);
+    renderSprite(this.background, this);
   }
   displayCreateButton(): void {
     const createButton = new Button(buttonColor.GREEN, "Create", () => {
       this.createRoom();
     });
-    adjustToCenterOfContainer(createButton, 200, 200);
-    this.modal.addChild(createButton);
+    renderSprite(createButton, this, 200, 200);
   }
   displayNavigator(): void {
-    const tag = PIXI.Sprite.from(PIXI.Loader.shared.resources["tag"].texture);
-    const arrowsheet: PIXI.Spritesheet =
-      PIXI.Loader.shared.resources["arrow"].spritesheet;
-    const arrowleft: PIXI.Sprite = new PIXI.Sprite(
-      arrowsheet.textures["left.png"]
-    );
-    const arrowright: PIXI.Sprite = new PIXI.Sprite(
-      arrowsheet.textures["right.png"]
-    );
-    makeInteractive(arrowleft, () => {
+    this.pageTag = PIXI.Sprite.from(PIXI.Loader.shared.resources["tag"].texture);
+    addText(this.pageTag, `${this.pageNumber}`, white);
+    const arrowsheet: PIXI.Spritesheet = PIXI.Loader.shared.resources["arrow"].spritesheet;
+    this.arrowleft = new ImageButton(arrowsheet.textures["left.png"], () => {
       console.log("left");
     });
-    makeInteractive(arrowright, () => {
+    this.arrowright = new ImageButton(arrowsheet.textures["right.png"], () => {
       console.log("right");
     });
-    addText(tag, `${this.pageNumber}`, white);
-    adjustToCenterOfContainer(tag, -150, 200);
-    adjustToCenterOfContainer(arrowleft, -300, 200);
-    adjustToCenterOfContainer(arrowright, 0, 200);
-    this.modal.addChild(tag);
-    this.modal.addChild(arrowleft);
-    this.modal.addChild(arrowright);
+    renderSprite(this.pageTag, this, -150, 200);
+    renderSprite(this.arrowleft, this, -300, 200);
+    renderSprite(this.arrowright, this, 0, 200);
   }
 
-  listRooms(roomList: Room[]): void {
+  listRooms(roomList: ILobbyRoom[]): void {
     roomList.map((rm, id) => {
       this.displayRoom(rm, id);
     });
   }
-  displayRoom(room: Room, id: number): void {
-    const roomField = PIXI.Sprite.from(
-      PIXI.Loader.shared.resources["field"].texture
-    );
-    roomField.x = -100;
-    roomField.y = -180 + id * 140;
-    const roomButton = new Button(buttonColor.GREEN, "JOIN", () => {
-      console.log("join");
-      this.globalEventHandler.emit("lobby:join", room.id);
-    });
-    roomButton.anchor.set(0.5);
-    roomField.anchor.set(0.5);
-
+  displayRoom(room: ILobbyRoom, id: number): void {
+    const roomField = PIXI.Sprite.from(PIXI.Loader.shared.resources["field"].texture);
     const textName = new PIXI.Text(room.name, white);
-    textName.anchor.set(0.5);
-    textName.x = -150;
-    textName.y = 0;
-    roomField.addChild(textName);
-
-    const textPlayer = new PIXI.Text(
-      `${room.players.length} players`,
-      subtitle
-    );
-    textPlayer.anchor.set(0.5);
-    textPlayer.x = 150;
-    textPlayer.y = 0;
-    roomField.addChild(textPlayer);
-
-    roomButton.x = 270;
-    roomButton.y = -180 + id * 140;
-    this.modal.addChild(roomField);
-    this.modal.addChild(roomButton);
+    const textPlayer = new PIXI.Text(`${room.playernumber} players`, subtitle);
+    const roomButton = new Button(buttonColor.GREEN, "JOIN", () => {
+      this.app.eventHandler.emit("lobby:join", room.id);
+    });
+    renderSprite(roomField, this, -100, id*140-180)
+    renderSprite(textName, this, -250, id*140-180)
+    renderSprite(textPlayer, this, 0, id*140-180)
+    renderSprite(roomButton, this, 270, 140*id-180)
   }
   show(): void {
-    this.container.visible = true;
+    this.visible = true;
   }
   hide(): void {
-    this.container.visible = false;
-  }
-  displayBackground(): void {
-    const modalTexture = PIXI.Loader.shared.resources["modal-wide"].texture;
-    this.modal = PIXI.Sprite.from(modalTexture);
-    adjustToCenterOfContainer(this.modal, 0, 0);
-    this.modal.height = modalTexture.height;
-    this.modal.width = modalTexture.width;
-    this.container.addChild(this.modal);
+    this.visible = false;
   }
 
-  initializeContainer(): void {
-    this.container = new PIXI.Container();
-    this.container.height = this.app.view.height;
-    this.container.width = this.app.view.width;
-    this.container.x = this.app.view.width / 2;
-    this.container.y = this.app.view.height / 2;
-    this.container.visible = false;
-    this.container.interactive = true;
-    this.app.stage.addChild(this.container);
-  }
-  appendRoom(room: Room): void {
+  appendRoom(room: ILobbyRoom): void {
     this.roomList = [...this.roomList, room];
     this.listRooms(this.roomList);
   }
-  listRoom(data: Room[]): void {
+  listRoom(data: ILobbyRoom[]): void {
     this.roomList = data;
     this.listRooms(this.roomList);
   }
-  updateRoom(room: Room): void {
+  updateRoom(room: ILobbyRoom): void {
     this.roomList = this.roomList.map((currentRoom) => {
       if (currentRoom.id === room.id) return room;
       return currentRoom;
@@ -144,6 +95,6 @@ export class Lobby {
     this.listRooms(this.roomList);
   }
   createRoom(name?: string): void {
-    this.globalEventHandler.emit("lobby:create", name);
+    this.app.eventHandler.emit("lobby:create", name);
   }
 }

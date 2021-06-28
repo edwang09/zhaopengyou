@@ -1,4 +1,4 @@
-import { Room, RoomID, Player, PlayerID } from "./room/room.schema";
+import { IRoom,ILobbyRoom, RoomID, Player, PlayerID, Trump } from "./room/room.schema";
 import { ValidationErrorItem } from "joi";
 
 interface Error {
@@ -9,21 +9,38 @@ interface Error {
 interface Success<T> {
   data: T;
 }
-
+export enum actionStates {
+  PREPARE,
+  KITTY,
+  PLAY,
+  CALL,
+  CLEAR
+}
 export type Response<T> = Error | Success<T>;
 
 export interface ServerEvents {
-  "lobby:created": (room: Room) => void;
-  "lobby:list": (rooms: Room[]) => void;
+  "lobby:created": (room: ILobbyRoom) => void;
+  "lobby:list": (rooms: ILobbyRoom[]) => void;
   "lobby:deleted": (id: RoomID) => void;
-  "lobby:updated": (room: Room) => void;
-  "room:updated": (room: Room) => void;
+  "lobby:updated": (room: ILobbyRoom) => void;
+  "room:player:updated": (room: IRoom) => void;
+  "room:card:updated": (room: IRoom) => void;
+  "room:trump:updated": (room: IRoom) => void;
+  "room:ticket:updated": (room: IRoom) => void;
+  "room:event": (actionState: actionStates) => void;
+  "player:deal": (cards: string[]) => void;
+  "player:kitty": (cards: string[]) => void;
 }
 export interface ClientEvents {
-  "lobby:join": (roomid: RoomID,player: Player, callback: (res?: Response<Room>) => void) => void;
+  "lobby:join": (roomid: RoomID,player: Player, callback: (res?: Response<{room: IRoom, hand?: string[]}>) => void) => void;
   "lobby:leave": (roomid: RoomID,playerid: PlayerID) => void;
   "lobby:create": (
-    payload: Omit<Room, "id">,
-    callback: (res: Response<Room>) => void
+    payload: Omit<IRoom, "id">,
+    callback: (res: Response<IRoom>) => void
   ) => void;
+  "room:prepare": (roomid: RoomID,playerid: PlayerID,prepare:boolean) =>void
+  "room:call": (roomid: RoomID,playerid: PlayerID, trump:Trump) =>void
+  "room:kitty": (roomid: RoomID,playerid: PlayerID, cards: string[]) =>void
+  "room:ticket": (roomid: RoomID,playerid: PlayerID, tickets: any) =>void
+  "room:play": (roomid: RoomID,playerid: PlayerID, cards: string[]) =>void
 }

@@ -5,15 +5,22 @@ export const USER_HAND = {
     HEIGHT: 200
 }
 export const CARD = {
-    NORMAL_SCALE: 0.5, 
-    SMALL_SCALE: 0.3, 
+    NORMAL_SCALE: 0.6, 
+    NORMAL_Y: 120, 
+    NORMAL2_SCALE: 0.5, 
+    NORMAL2_VERTICAL_GAP: 60, 
+    SMALL_SCALE: 0.35, 
+    TINY_SCALE: 0.3,
     NORMAL_GAP: 30, 
     SMALL_GAP: 18, 
+    TINY_GAP: 18, 
     HEIGHT : 240,
     WIDTH : 160,
-    POP_DISTANCE : 30
+    POP_DISTANCE : 30,
+    HOVER_DISTANCE: 5
 }
 export const PLAYER_AREA_DIMENSION = {
+    TWOLINE_GAP: 50,
     WIDTH : 341,
     HEIGHT: 200
 }
@@ -30,6 +37,18 @@ export const OPTIONS = {
     OFFSET_X: 30,
     OFFSET_Y: 10,
     GAP: 35
+}
+export const ACTIONS = {
+    X : 342,
+    Y: 343,
+    WIDTH : 341,
+    HEIGHT: 200
+}
+export const USER_PLAY = {
+    X : 342,
+    Y: 210,
+    WIDTH : 341,
+    HEIGHT: 153
 }
 export const HAND = {
     SMALL_RIGHT_END: PLAYER_AREA_DIMENSION.WIDTH-HUD_DIMENSION.WIDTH - CARD.WIDTH*CARD.SMALL_SCALE/2

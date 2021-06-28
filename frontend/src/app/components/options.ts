@@ -1,16 +1,18 @@
 import EventEmitter = require("eventemitter3");
 import * as PIXI from "pixi.js";
 import { OPTIONS } from "../constants/dimension";
-import { adjustToCenterOfContainer, makeInteractive } from "../helpers/helper";
+import { GameRoom } from "../gameroom";
+import { adjustToCenterOfContainer, makeInteractive, renderContainer } from "../helpers/helper";
 import { Button } from "./button";
 
 export class Options extends PIXI.Container {
   cards: string[];
-  eventHandler: EventEmitter;
-  constructor(eventHandler: EventEmitter) {
+  room: GameRoom;
+  constructor(room:GameRoom) {
     super();
-    this.eventHandler = eventHandler;
+    this.room = room;
     this.renderIcons();
+    renderContainer(this, this.room, OPTIONS.X,OPTIONS.Y)
   }
   renderIcons(): void {
     const info: PIXI.Sprite = PIXI.Sprite.from(
@@ -61,7 +63,7 @@ export class Options extends PIXI.Container {
       console.log("leader");
     });
     makeInteractive(reverse, () => {
-      console.log("reverse");
+      this.room.app.eventHandler.emit("room:leave")
     });
     makeInteractive(audio, () => {
       console.log("audio");

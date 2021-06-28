@@ -1,6 +1,7 @@
 
 import { createServer } from "http";
 import { createApplication } from "./app";
+import { InMemoryHandRepository } from "./room/hand.repository";
 import { InMemoryRoomRepository } from "./room/room.repository";
 
 const httpServer = createServer();
@@ -9,6 +10,7 @@ createApplication(
   httpServer,
   {
     roomRepository: new InMemoryRoomRepository(),
+    handRepository: new InMemoryHandRepository()
   },
   {
     cors: {

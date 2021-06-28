@@ -1,60 +1,49 @@
 import * as PIXI from "pixi.js";
 import { IPlayerData } from "../interfaces/playerData";
-import {
-    adjustToCenterOfContainer,
-    addText,
-  } from "../helpers/helper";
-import { TSlevel, white } from "../textstyle";
+import { adjustToCenterOfContainer, addText, renderContainer } from "../helpers/helper";
+import { playerName, TSlevel, white } from "../textstyle";
 import { HUD_DIMENSION } from "../constants/dimension";
+import { GameRoom } from "../gameroom";
+import { Avatar } from "./avatar";
+import { Level } from "./level";
+import { PlayerName } from "./playerName";
+import { PlayerCamp } from "./playerCamp";
 
-
-  export class Hud extends PIXI.Container{
-    cards:string[];
-    constructor(player:IPlayerData) {
-        super();
-        this.height = HUD_DIMENSION.HEIGHT;
-        this.width = HUD_DIMENSION.WIDTH;
-        this.visible = true;
-        this.displayAvatar(player.avatarIndex)
-        this.displayLevel(player.level || 2)
-        this.displayName(player.name || "player")
-        this.displayCamp(player.camp || "unknown")
+export class Hud extends PIXI.Container {
+  cards: string[];
+  room: PIXI.Container;
+  avatar: Avatar;
+  level: Level;
+  playername: PlayerName;
+  camp: PlayerCamp;
+  constructor(room: PIXI.Container, player: IPlayerData, x =  HUD_DIMENSION.USER_X, y = HUD_DIMENSION.USER_Y) {
+    super();
+    this.room = room;
+    this.visible = true;
+    if (player){
+      this.avatar = new Avatar(this, player.avatarIndex.toString())
+      this.level = new Level(this, player.level)
+      this.playername = new PlayerName(this, player.name)
+      this.camp = new PlayerCamp(this, player.camp)
+    }else{
+      this.avatar = new Avatar(this, "b")
+      this.playername = new PlayerName(this)
     }
-    displayAvatar(avatarIndex:number):void{
-        const avatar: PIXI.Sprite =
-        PIXI.Sprite.from(PIXI.Loader.shared.resources["avatar"].spritesheet.textures[`a${avatarIndex}.png`]);
-        this.addChild(avatar);
-        adjustToCenterOfContainer(avatar, HUD_DIMENSION.WIDTH/2, 100);
-    }
-    displayLevel(level:number):void{
-        const levelArray = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"]
-        const levelString = levelArray[level-2];
-        const levelText:PIXI.Sprite = PIXI.Sprite.from(PIXI.Loader.shared.resources["star"].texture)
-        // levelText.scale.set(1.2)
-        addText(levelText, levelString, TSlevel)
-        this.addChild(levelText);
-        adjustToCenterOfContainer(levelText, 30, 35);
-
-    }
-    displayName(player:string):void{
-        const playerText = new PIXI.Text(player, white);
-        this.addChild(playerText);
-        adjustToCenterOfContainer(playerText, 70, 35);
-        
-    }
-    displayCamp(camp:string):void{
-        //TODO: change color for different camp
-        let color = "green";
-        switch (camp) {
-            default:
-                color = "green"
-                break;
-        }
-        const campText:PIXI.Sprite = PIXI.Sprite.from(PIXI.Loader.shared.resources["button"].spritesheet.textures[`button-${color}-0.png`])
-        campText.scale.set(0.5)
-        addText(campText, camp, white)
-        this.addChild(campText);
-        adjustToCenterOfContainer(campText, HUD_DIMENSION.WIDTH/2, 165);
-    }
-
+    renderContainer(this, this.room, x,y)
   }
+  update(player: IPlayerData) {
+    if (player) {
+      this.avatar.updateAvatar(player.avatarIndex.toString())
+      this.playername.update(player.name)
+      this.level.updateLevel(player.level)
+      this.camp.updateCamp(player.camp)
+      this.level.visible = true
+      this.camp.visible = true
+    }else{
+      this.avatar.updateAvatar("b")
+      this.playername.update()
+      if(this.level) this.level.visible = false
+      if(this.camp) this.camp.visible = false
+    }
+  }
+}

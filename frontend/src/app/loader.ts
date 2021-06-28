@@ -1,10 +1,4 @@
 import * as PIXI from "pixi.js";
-// import background from "../assets/images/background.png";
-// // import * as avatar from "../assets/images/avatar.json";
-// // import button from "../assets/images/button.json";
-// // import arrow from "../assets/images/arrow.json";
-// import modalTall from "../assets/images/modal-tall.png";
-// import modalWide from "../assets/images/modal-wide.png";
 
 export class Loader {
   _callback: () => void;
@@ -25,6 +19,7 @@ export class Loader {
     this._assetLoader.add("arrow", "arrow.json");
     this._assetLoader.add("card", "card.json");
     this._assetLoader.add("icon", "icon.json");
+    this._assetLoader.add("suits", "suits.json");
     this._assetLoader.onComplete.add(this._onImagesLoad.bind(this));
     this.resources = this._assetLoader.resources;
   }

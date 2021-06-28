@@ -4,9 +4,9 @@ export const idSchema = Joi.string().guid({
 });
 export const MAX_PLAYER = 6;
 export const playerSchema = Joi.object({
-    id: Joi.string(),
-    name: Joi.string().max(256).required(),
-    avatarIndex: Joi.number(),
+  id: Joi.string(),
+  name: Joi.string().max(256).required(),
+  avatarIndex: Joi.number(),
 });
 export const roomSchema = Joi.object({
   id: idSchema.alter({
@@ -25,9 +25,36 @@ export interface Player {
   name: string;
   avatarIndex: number;
   socketid: string;
+  level?: number;
+  camp?: string;
+  prepared?: boolean;
+  cards?: string[];
+  actionState?:number
 }
-export interface Room {
+export interface Ticket {
+  card: string
+  sequence : number
+}
+export interface Trump {
+  number: string
+  suit?: string
+  count: number
+  callerId?: string
+  lastCall?: string[]
+}
+export interface ILobbyRoom {
   id: RoomID;
   name: string;
-  players: Player[];
+  playernumber: number;
+}
+
+export interface IRoom {
+  id: RoomID;
+  name: string;
+  startLevel: number
+  players: (Player | null)[];
+  dealerIndex?:number
+  trump:Trump
+  kitty?:string[]
+  tickets?:Ticket[]
 }

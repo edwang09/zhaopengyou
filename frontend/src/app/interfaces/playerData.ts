@@ -4,9 +4,12 @@ export interface IPlayerData{
     id: string,
     level?: number,
     camp?: string
+    prepared?: boolean;
+    cards?: string[];
 }
 export interface IRoomData{
     name: string,
     id?: string,
     players: IPlayerData[]
+    dealerIndex?:number
 }

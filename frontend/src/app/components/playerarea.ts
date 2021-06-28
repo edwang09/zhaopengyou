@@ -3,33 +3,41 @@ import { IPlayerData } from "../interfaces/playerData";
 import { Hud } from "./hud";
 import { Hand } from "./hand";
 import { PLAYER_AREA_DIMENSION,HUD_DIMENSION } from "../constants/dimension";
+import { handTypes } from "../enums/enums";
+import { Play } from "./play";
+import { renderContainer } from "../helpers/helper";
+import { GameRoom } from "../gameroom";
 
 
   export class PlayerArea extends PIXI.Container{
+
+
     cards:string[];
-    constructor(player:IPlayerData, x:number, y:number, side:number) {
+    hud: Hud;
+    playHandler: Play;
+    room: GameRoom;
+    constructor(room:GameRoom, player:IPlayerData, x:number, y:number, side:number) {
         super();
         this.height = PLAYER_AREA_DIMENSION.HEIGHT;
         this.width = PLAYER_AREA_DIMENSION.WIDTH;
         this.x = x;
         this.y = y;
+        this.room = room;
         this.visible = true;
         this.displayHud(player, side)
         this.displayCards(side)
+        renderContainer(this, this.room, x,y)
     }
     displayHud(player:IPlayerData, side:number):void{
-        const hud = new Hud(player)
-        this.addChild(hud)
-        hud.x = side * (PLAYER_AREA_DIMENSION.WIDTH-HUD_DIMENSION.WIDTH)
-        hud.y = 0
+        this.hud = new Hud(this, player, side * (PLAYER_AREA_DIMENSION.WIDTH-HUD_DIMENSION.WIDTH),0)
     }
     displayCards(side:number):void{
-        const hand = new Hand(["h03", "d04", "s12"], "small", false, side);
-        this.addChild(hand)
-        hand.x = HUD_DIMENSION.WIDTH - side * HUD_DIMENSION.WIDTH
-        hand.y = 0
+        this.playHandler = new Play(this,HUD_DIMENSION.WIDTH - side * HUD_DIMENSION.WIDTH, 0, [], handTypes.PLAYER_CARD, side);
     }
-
-
-
-  }
+    updatePlayer(player: IPlayerData) {
+      this.hud.update(player)
+    }
+    updateCards(cards: string[] =[]) {
+      this.playHandler.update(cards)
+    }
+}

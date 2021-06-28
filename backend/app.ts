@@ -2,10 +2,12 @@
 import { Server as HttpServer } from "http";
 import { Server, ServerOptions } from "socket.io";
 import { ClientEvents, ServerEvents } from "./events";
-import { RoomRepository } from "./room/room.repository";
+import { InMemoryRoomRepository } from "./room/room.repository";
 import { registerRoomHandlers} from "./room/room.handler";
+import { InMemoryHandRepository } from "./room/hand.repository";
 export interface Components {
-  roomRepository: RoomRepository;
+  roomRepository: InMemoryRoomRepository;
+  handRepository: InMemoryHandRepository;
 }
 
 export function createApplication(
