@@ -14,7 +14,7 @@ import { GameApp } from "./app";
 import { Play } from "./components/play";
 import { getCallableTrumps, getPopCardIndex, renderContainer, sortHand, validateAction } from "./helpers/helper";
 import { TicketRegister } from "./components/ticketregister";
-import { TicketBoard } from "./components/ticketBoard";
+import { TicketBoard } from "./components/ticketboard";
 
 export class GameRoom extends PIXI.Container {
   app: GameApp;
