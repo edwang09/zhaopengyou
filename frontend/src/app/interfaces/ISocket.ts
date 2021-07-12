@@ -1,4 +1,4 @@
-import { actionStates } from "../enums/enums";
+import { actionStates, playerCamp } from "../enums/enums";
 
 interface Error {
   error: string;
@@ -20,15 +20,17 @@ export interface Player {
   avatarIndex: number;
   socketid?: string;
   level?: number,
-  camp?: string
+  camp?: playerCamp
   prepared?: boolean;
-  cards?: string[];
+  cards: string[];
+  points: string[];
   actionState?:number
 }
 export interface Ticket {
-  suit?: string
-  number?: string
-  sequence? : number
+  card: string
+  // sequence start from 1, seen initialized with 0
+  sequence : number
+  seen : number
 }
 export interface Trump {
   number: string
@@ -49,6 +51,7 @@ export interface IRoom {
   players: (Player | null)[];
   startLevel: number
   dealerIndex?:number
+  initiatorIndex?:number
   trump:Trump
   kitty?:string[]
   tickets?:Ticket[]
@@ -66,6 +69,7 @@ export interface ServerEvents {
   "room:ticket:updated": (room: IRoom) => void;
   "room:event": (actionState: actionStates) => void;
   "player:kitty": (cards: string[]) => void;
+  "player:play": () => void;
 }
   export interface ClientEvents {
     "lobby:list": () => void;

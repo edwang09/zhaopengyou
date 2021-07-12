@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
-import { PlayerID, Trump } from "../interfaces/ISocket";
+import { IRoom, PlayerID, Trump } from "../interfaces/ISocket";
+import { canPlay } from "./validation";
 
 export const addText = (sprite: PIXI.Sprite, textMessage: string, style: PIXI.TextStyle, x = 0, y = 0): PIXI.Text => {
   const text = new PIXI.Text(textMessage, style);
@@ -150,18 +151,10 @@ export const getPopCardIndex = (hand: string[], picked: number[], card: string, 
 
   return [...picked, index];
 };
-export const validateAction = (hand: string[], picked: number[], trump: Trump): any => {
-  let kitty = false;
-  if (picked.length === 6) kitty = true;
-  return {
-    kitty,
-    play: true,
-  };
-};
 
 export const numberToOrder = (n?: number): string => {
   if (n === undefined) return "??th";
-  return ["First", "Second", "Third", "Forth"][n];
+  return ["First", "Second", "Third", "Forth"][n-1];
 };
 
 export const cardToName = (suit?: string, number?: string): string => {

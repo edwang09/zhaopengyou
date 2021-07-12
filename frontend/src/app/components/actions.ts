@@ -17,12 +17,14 @@ export class Action extends PIXI.Container {
   state: actionStates;
   room: GameRoom;
   PlayButton: Button;
+  CancelButton: Button;
   constructor(room: GameRoom) {
     super();
     this.room = room;
     this.displayPrepareButton();
     this.displayKittyButton();
     this.displaPlayButton()
+    this.displaCancelButton()
     renderContainer(this, this.room, ACTIONS.X, ACTIONS.Y)
     this.switchState(actionStates.PREPARE);
   }
@@ -59,13 +61,20 @@ export class Action extends PIXI.Container {
   }
 
   displaPlayButton() {
-    this.PlayButton = new Button(buttonColor.GREEN, "Confirm", () => {
+    this.PlayButton = new Button(buttonColor.GREEN, "Play", () => {
       this.room.playCard()
+      this.PlayButton.toggleDisable(false)
     });
     adjustToCenterOfContainer(this.PlayButton, 0, 150);
     this.addChild(this.PlayButton);
   }
-  notifySelected(cards: string[]): void {}
+  displaCancelButton() {
+    this.CancelButton = new Button(buttonColor.RED, "Cancel", () => {
+      this.room.cancelCard()
+    });
+    adjustToCenterOfContainer(this.CancelButton, 200, 150);
+    this.addChild(this.CancelButton);
+  }
   switchState(state: actionStates) {
     switch (state) {
       case actionStates.PREPARE:
@@ -108,6 +117,11 @@ export class Action extends PIXI.Container {
   }
   toggleDisable(config: any) {
     this.KittyButton.toggleDisable(config.kitty);
-    this.PlayButton.toggleDisable(config.play);
+    this.PlayButton.toggleDisable(config.play.canPlay);
+    if (config.play.canPlay && config.play.isDump){
+      this.PlayButton.setText("Dump")
+    }else{
+      this.PlayButton.setText("Play")
+    }
   }
 }

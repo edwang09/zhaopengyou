@@ -1,11 +1,12 @@
 {
-    "compilerOptions": {
-      "outDir": "./dist",
-      "module": "commonjs",
-      "target": "es2017",
-      "strict": true
-    },
-    "include": [
-      "./**/*"
-    ]
-  }
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "commonjs",
+    "target": "es2017",
+    "moduleResolution": "node",
+    "types": ["jest", "node"],
+    "typeRoots": ["./types", "./node_modules/@types"]
+  },
+  "exclude": ["helpers/**/*", "node_modules"],
+  // "include": ["room/**/*"]
+}

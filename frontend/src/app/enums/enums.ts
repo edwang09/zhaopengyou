@@ -20,3 +20,9 @@ export enum actionStates {
   CALL,
   CLEAR
 }
+export enum playerCamp {
+    DEALER,
+    HOUSE,
+    PLAYER,
+    UNKNOWN
+}

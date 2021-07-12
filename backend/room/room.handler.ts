@@ -3,9 +3,9 @@ import { Components } from "../app";
 import { actionStates, ClientEvents, Response, ServerEvents } from "../events";
 import { Server, Socket } from "socket.io";
 import { v4 as uuid } from "uuid";
-import { idSchema, IRoom, RoomID, Player, PlayerID, MAX_PLAYER, ILobbyRoom, Ticket, Trump } from "./room.schema";
+import { idSchema, IRoom, RoomID, Player, PlayerID, MAX_PLAYER, ILobbyRoom, Ticket, Trump, playerCamp } from "./room.schema";
 import { StripeRoom } from "./room.repository";
-import { newDeck } from "../helpers/helper";
+import { resolvePlay, newDeck } from "../helpers/helper";
 import { InMemoryHandRepository } from "./hand.repository";
 
 export function registerRoomHandlers(
@@ -13,6 +13,7 @@ export function registerRoomHandlers(
   socket: Socket<ClientEvents, ServerEvents>,
   components: Components
 ): void {
+
   // list lobby
   const { roomRepository, handRepository } = components;
   roomRepository.listLobby().then((rooms: ILobbyRoom[]) => {
@@ -33,9 +34,11 @@ export function registerRoomHandlers(
     // validate the payload
     const value = payload as unknown as IRoom;
     value.id = uuid();
-    (value.players[0] as Player).socketid = socket.id;
-    (value.players[0] as Player).actionState = actionStates.PREPARE;
-    (value.players[0] as Player).level = payload.startLevel;
+    value.players[0].socketid = socket.id;
+    value.players[0].actionState = actionStates.PREPARE;
+    value.players[0].level = payload.startLevel;
+    value.players[0].points = [];
+    value.players[0].cards = [];
 
     // persist the entity
     try {
@@ -66,20 +69,23 @@ export function registerRoomHandlers(
       console.log(roomid)
       const room: IRoom = await roomRepository.findById(roomid);
       console.log(room)
+      //rejoin
       if (room.players.some((p) => p && p.id === player.id)) {
         const hand: string[] = await handRepository.getById(player.id);
-        room.players.map((p) => {
+        console.log("player rejoining...")
+        room.players = room.players.map((p) => {
           if (p && p.id === player.id) return { ...player, socketid: socket.id };
           return p;
         });
         callback({ data: { room, hand } });
+        // first time joining
       } else if (room.players.filter((p) => p).length < MAX_PLAYER) {
         let firstNull = true;
         console.log(room.players);
         room.players = room.players.map((p) => {
           if (firstNull && p === null) {
             firstNull = false;
-            return { ...player, socketid: socket.id, actionState: actionStates.PREPARE, level: room.startLevel };
+            return { ...player, socketid: socket.id, actionState: actionStates.PREPARE, level: room.startLevel, cards:[], points:[] };
           }
           return p;
         });
@@ -122,7 +128,7 @@ export function registerRoomHandlers(
     const room: IRoom = await roomRepository.findById(roomid);
     room.players = room.players.map((p) => {
       if (p && p.id === playerid) {
-        return { ...p, prepared: prepare, camp:"READY" };
+        return { ...p, prepared: prepare };
       } else {
         return p;
       }
@@ -150,7 +156,7 @@ export function registerRoomHandlers(
     const room: IRoom = await roomRepository.findById(roomid);
     if (validateCall(trump, room.trump)) {
       room.trump = trump;
-      room.players = room.players.map((p) => (p && p.id === playerid ? { ...p, cards: trump.lastCall } : p));
+      room.players = room.players.map((p) => (p && p.id === playerid ? { ...p, cards: trump.lastCall as string[] } : p));
       roomRepository.save(room);
       try {
         io.to(room.id).emit("room:trump:updated", room);
@@ -175,13 +181,11 @@ export function registerRoomHandlers(
     room.tickets = tickets;
     const playerIndex = room.players.findIndex((p) => p && p.id === playerid);
     try {
-      (room.players[playerIndex] as Player).camp = "dealer";
+      room.players[playerIndex].camp = playerCamp.DEALER;
       room.players = room.players.map((p) => {
-        if (p) {
-          return { ...p, actionState: actionStates.PLAY };
-        }
-        return p;
+        return { ...p, actionState: actionStates.CLEAR, cards:[] };
       });
+      room.players[playerIndex].actionState = actionStates.PLAY;
       io.to(room.id).emit("room:ticket:updated", room);
       io.to(room.id).emit("room:player:updated", room);
     } catch (error) {
@@ -191,10 +195,15 @@ export function registerRoomHandlers(
   socket.on("room:play", async function (roomid: RoomID, playerid: PlayerID, cards: string[]) {
     console.log("room:play");
     const room: IRoom = await roomRepository.findById(roomid);
-    room.players = room.players.map((p) => (p && p.id === playerid ? { ...p, cards } : p));
+    const [nextIndex, newRoom] = resolvePlay(room,playerid,cards)
+    await roomRepository.save(newRoom)
     try {
       await handRepository.remove(playerid, cards);
       io.to(room.id).emit("room:card:updated", room);
+      // TODO: this may be no use
+      if (room.players[nextIndex].socketid) {
+        io.to(room.players[nextIndex].socketid).emit("player:play");
+      }
     } catch (error) {
       console.error(error);
     }
@@ -232,7 +241,10 @@ function dealCard(io: Server, socket: Socket, room: IRoom, handRepository: InMem
   }, 30);
 }
 async function buryCard(io: Server, socket: Socket, room: IRoom, handRepository: InMemoryHandRepository, deck: string[]) {
-  if (!room.dealerIndex && room.trump.callerId) room.dealerIndex = room.players.findIndex((p) => p && p.id === room.trump.callerId);
+  if (!room.dealerIndex && room.trump.callerId){ 
+    room.dealerIndex = room.players.findIndex((p) => p && p.id === room.trump.callerId);
+  }
+  room.initiatorIndex = room.dealerIndex
   try {
     room.players = room.players.map((p,idx) => {
       if (p && room.dealerIndex  === idx) {

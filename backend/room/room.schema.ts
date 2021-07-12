@@ -20,20 +20,29 @@ export const roomSchema = Joi.object({
 export type RoomID = string;
 export type PlayerID = string;
 
+export enum playerCamp {
+  DEALER,
+  HOUSE,
+  PLAYER,
+  UNKNOWN
+}
 export interface Player {
   id: PlayerID;
   name: string;
   avatarIndex: number;
   socketid: string;
   level?: number;
-  camp?: string;
+  camp: playerCamp;
   prepared?: boolean;
-  cards?: string[];
+  cards: string[];
+  points: string[];
   actionState?:number
 }
 export interface Ticket {
   card: string
+  // sequence start from 1, seen initialized with 0
   sequence : number
+  seen : number
 }
 export interface Trump {
   number: string
@@ -54,6 +63,7 @@ export interface IRoom {
   startLevel: number
   players: (Player | null)[];
   dealerIndex?:number
+  initiatorIndex?:number
   trump:Trump
   kitty?:string[]
   tickets?:Ticket[]

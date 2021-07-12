@@ -113,12 +113,13 @@ export class GameApp extends PIXI.Application{
     this.socket.on("room:player:updated", (room: IRoom) => {
       console.log("room:player:updated : " + room.players)
       this.gameroom.updatePlayers(room);
-      this.gameroom.action.switchState(room.players.filter(p=>(p&& p.id === this.userData.id))[0].actionState)
+      this.gameroom.switchState(room)
 
     });
     this.socket.on("room:card:updated", (room: IRoom) => {
       console.log("room:card:updated : " + room.players)
       this.gameroom.updatePlayerCards(room);
+      this.gameroom.switchState(room)
     });
     this.socket.on("room:event", (actionState: actionStates) => {
       this.handleActionState(actionState)
@@ -141,8 +142,10 @@ export class GameApp extends PIXI.Application{
       console.log("player:ticket:updated : ", room.tickets)
       this.gameroom.updatePlayers(room);
       this.gameroom.updateTicket(room);    
-      this.gameroom.action.switchState(room.players.filter(p=>p.id === this.userData.id)[0].actionState)
-
+      this.gameroom.switchState(room)
+    });
+    this.socket.on("player:play", () => {
+      this.gameroom.action.switchState(actionStates.PLAY);
     });
   }
   handleActionState(actionState: actionStates) {
@@ -181,7 +184,7 @@ export class GameApp extends PIXI.Application{
     this.gameroom.updatePlayers(roomData)
     this.gameroom.updateTrump(roomData)
     this.gameroom.updatePlayerCards(roomData)
-    this.gameroom.action.switchState(roomData.players.filter(p=>(p && p.id === this.userData.id))[0].actionState)
+    this.gameroom.switchState(roomData)
   }
   distroyRoom() {
     this.lobby.show();

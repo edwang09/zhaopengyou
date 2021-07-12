@@ -31,7 +31,7 @@ export class TicketBoard extends PIXI.Container {
   }
   displayTicket(background: PIXI.Sprite, tickets: Ticket[]): void {
     this.tickets = tickets.map((t, id) => {
-      const card = new Card(t.suit + t.number, "small", false);
+      const card = new Card(t.card , "small", false);
       const text = new PIXI.Text(numberToOrder(t.sequence), defaultStyle);
       adjustToCenterOfContainer(card, 100 + id * 100, 80);
       adjustToCenterOfContainer(text, 100 + id * 100, 140);

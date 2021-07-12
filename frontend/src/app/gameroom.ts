@@ -1,7 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Hand } from "./components/hand";
 import { Hud } from "./components/hud";
-import { IPlayerData, IRoomData } from "./interfaces/playerData";
 import { IUserData } from "./interfaces/userdata";
 import EventEmitter = require("eventemitter3");
 import { PlayerArea } from "./components/playerarea";
@@ -12,9 +11,10 @@ import { actionButtons, actionStates, handTypes } from "./enums/enums";
 import { Action } from "./components/actions";
 import { GameApp } from "./app";
 import { Play } from "./components/play";
-import { getCallableTrumps, getPopCardIndex, renderContainer, sortHand, validateAction } from "./helpers/helper";
+import { getCallableTrumps, getPopCardIndex, renderContainer, sortHand } from "./helpers/helper";
 import { TicketRegister } from "./components/ticketregister";
 import { TicketBoard } from "./components/ticketboard";
+import { canPlay } from "./helpers/validation";
 
 export class GameRoom extends PIXI.Container {
   app: GameApp;
@@ -52,14 +52,14 @@ export class GameRoom extends PIXI.Container {
     renderContainer(this, this.app.stage);
   }
 
-  arrangePlayer(players: IPlayerData[]): IPlayerData[] {
+  arrangePlayer(players: Player[]): Player[] {
     return [...players.slice(this.userIndex + 1), ...players.slice(0, this.userIndex)];
   }
-  arrangeUser(players: IPlayerData[]): IPlayerData {
+  arrangeUser(players: Player[]): Player {
     return players[this.userIndex];
   }
   updatePlayers(room: IRoom): void {
-    this.roomData = { ...this.roomData, players: room.players };
+    this.roomData = room;
     const players = this.arrangePlayer(room.players);
     this.playerAreas.map((ph, id) => {
       ph.updatePlayer(players[id]);
@@ -69,7 +69,7 @@ export class GameRoom extends PIXI.Container {
     this.ticketBoard.updateTickets(room.tickets);
   }
   updatePlayerCards(room: IRoom): void {
-    this.roomData = { ...this.roomData, players: room.players };
+    this.roomData = room;
     const players = this.arrangePlayer(room.players);
     const user = this.arrangeUser(room.players);
     this.playerAreas.map((ph, id) => {
@@ -113,7 +113,12 @@ export class GameRoom extends PIXI.Container {
   selectHand(card: string, index: number) {
     this.pickedIndex = getPopCardIndex(this.handData, this.pickedIndex, card, index, this.roomData.trump);
     this.hand.popCard(this.pickedIndex);
-    this.action.toggleDisable(validateAction(this.handData, this.pickedIndex, this.roomData.trump));
+    this.action.toggleDisable(
+      {
+        kitty: this.pickedIndex.length === 6,
+        play: canPlay(this.handData, this.pickedIndex, this.roomData, this.roomData.initiatorIndex === this.userIndex),
+      }
+    );
   }
   playCard() {
     const cards = this.pickedIndex.map((id) => this.handData[id]);
@@ -124,5 +129,18 @@ export class GameRoom extends PIXI.Container {
     this.pickedIndex = [];
     this.hand.update(this.handData);
     this.app.eventHandler.emit("room:play", cards);
+  }
+  cancelCard(){
+    this.pickedIndex = [];
+    this.hand.update(this.handData);
+    this.action.toggleDisable(
+      {
+        kitty: this.pickedIndex.length === 6,
+        play: canPlay(this.handData, this.pickedIndex, this.roomData, this.roomData.initiatorIndex === this.userIndex),
+      }
+    );
+  }
+  switchState(roomData:IRoom) {
+    this.action.switchState(roomData.players[this.userIndex].actionState)
   }
 }

@@ -8,6 +8,7 @@ import { Avatar } from "./avatar";
 import { Level } from "./level";
 import { PlayerName } from "./playerName";
 import { PlayerCamp } from "./playerCamp";
+import { Player } from "../interfaces/ISocket";
 
 export class Hud extends PIXI.Container {
   cards: string[];
@@ -16,7 +17,7 @@ export class Hud extends PIXI.Container {
   level: Level;
   playername: PlayerName;
   camp: PlayerCamp;
-  constructor(room: PIXI.Container, player: IPlayerData, x =  HUD_DIMENSION.USER_X, y = HUD_DIMENSION.USER_Y) {
+  constructor(room: PIXI.Container, player: Player, x =  HUD_DIMENSION.USER_X, y = HUD_DIMENSION.USER_Y) {
     super();
     this.room = room;
     this.visible = true;
@@ -31,7 +32,7 @@ export class Hud extends PIXI.Container {
     }
     renderContainer(this, this.room, x,y)
   }
-  update(player: IPlayerData) {
+  update(player: Player) {
     if (player) {
       this.avatar.updateAvatar(player.avatarIndex.toString())
       this.playername.update(player.name)

@@ -7,6 +7,7 @@ import { handTypes } from "../enums/enums";
 import { Play } from "./play";
 import { renderContainer } from "../helpers/helper";
 import { GameRoom } from "../gameroom";
+import { Player } from "../interfaces/ISocket";
 
 
   export class PlayerArea extends PIXI.Container{
@@ -16,7 +17,7 @@ import { GameRoom } from "../gameroom";
     hud: Hud;
     playHandler: Play;
     room: GameRoom;
-    constructor(room:GameRoom, player:IPlayerData, x:number, y:number, side:number) {
+    constructor(room:GameRoom, player:Player, x:number, y:number, side:number) {
         super();
         this.height = PLAYER_AREA_DIMENSION.HEIGHT;
         this.width = PLAYER_AREA_DIMENSION.WIDTH;
@@ -28,13 +29,13 @@ import { GameRoom } from "../gameroom";
         this.displayCards(side)
         renderContainer(this, this.room, x,y)
     }
-    displayHud(player:IPlayerData, side:number):void{
+    displayHud(player:Player, side:number):void{
         this.hud = new Hud(this, player, side * (PLAYER_AREA_DIMENSION.WIDTH-HUD_DIMENSION.WIDTH),0)
     }
     displayCards(side:number):void{
         this.playHandler = new Play(this,HUD_DIMENSION.WIDTH - side * HUD_DIMENSION.WIDTH, 0, [], handTypes.PLAYER_CARD, side);
     }
-    updatePlayer(player: IPlayerData) {
+    updatePlayer(player: Player) {
       this.hud.update(player)
     }
     updateCards(cards: string[] =[]) {

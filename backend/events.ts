@@ -1,4 +1,4 @@
-import { IRoom,ILobbyRoom, RoomID, Player, PlayerID, Trump } from "./room/room.schema";
+import { IRoom,ILobbyRoom, RoomID, Player, PlayerID, Trump, Ticket } from "./room/room.schema";
 import { ValidationErrorItem } from "joi";
 
 interface Error {
@@ -30,6 +30,7 @@ export interface ServerEvents {
   "room:event": (actionState: actionStates) => void;
   "player:deal": (cards: string[]) => void;
   "player:kitty": (cards: string[]) => void;
+  "player:play": () => void;
 }
 export interface ClientEvents {
   "lobby:join": (roomid: RoomID,player: Player, callback: (res?: Response<{room: IRoom, hand?: string[]}>) => void) => void;
@@ -41,6 +42,6 @@ export interface ClientEvents {
   "room:prepare": (roomid: RoomID,playerid: PlayerID,prepare:boolean) =>void
   "room:call": (roomid: RoomID,playerid: PlayerID, trump:Trump) =>void
   "room:kitty": (roomid: RoomID,playerid: PlayerID, cards: string[]) =>void
-  "room:ticket": (roomid: RoomID,playerid: PlayerID, tickets: any) =>void
+  "room:ticket": (roomid: RoomID,playerid: PlayerID, tickets: Ticket[]) =>void
   "room:play": (roomid: RoomID,playerid: PlayerID, cards: string[]) =>void
 }

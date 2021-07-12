@@ -57,7 +57,6 @@ export class Hand extends PIXI.Container {
         }
       })
       .on("pointerout", () => {
-        console.log("pointerout",id)
         card.y = card.selected ? card.originY-CARD.POP_DISTANCE : card.originY;
       })
       .on("pointerdown", () => {
