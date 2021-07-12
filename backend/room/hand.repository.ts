@@ -25,7 +25,7 @@ export class InMemoryHandRepository {
   remove(id: PlayerID, cards: string[]): Promise<void> {
     const current = this.hands.get(id);
     if (current) {
-      cards.map((c) => {
+      cards.forEach((c) => {
         const index = current.indexOf(c);
         current.splice(index,1);
       });

@@ -41,7 +41,7 @@ export class TicketBoard extends PIXI.Container {
     });
   }
   updateTickets(tickets?: Ticket[]): void {
-    this.tickets.map(t=> { 
+    this.tickets.forEach(t=> { 
       this.removeChild(t.card);
       this.removeChild(t.text);
     })

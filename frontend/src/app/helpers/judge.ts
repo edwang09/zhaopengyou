@@ -49,7 +49,7 @@ export class Judge {
         this.getOrder(decomposeAttack[0].card),
       ];
     // defend is dump
-    while (decomposeAttack.length > 0) {
+    if (decomposeAttack.length > 0) {
       const pairDefend = this.getPairDirectoryFromDecompose(decomposeDefence);
       const pairAttach = this.getPairDirectoryFromDecompose(decomposeAttack);
       const tolajiDefend = this.getTolajiDirectoryFromDecompose(decomposeDefence);
@@ -87,11 +87,11 @@ export class Judge {
 
   // check if a list of number has a consecutive numbers of length (height)
   hasConsequtiveNumber(orderOfOverCard: number[], height: number) {
-    orderOfOverCard.sort();
-    let last = orderOfOverCard[0];
+    orderOfOverCard.sort((a,b)=>a-b);
+    let previous = orderOfOverCard[0];
     let currentHeight = 1;
     for (let index = 1; index < orderOfOverCard.length; index++) {
-      if (last + 1 === orderOfOverCard[index]) {
+      if (previous + 1 === orderOfOverCard[index]) {
         currentHeight++;
       } else {
         currentHeight = 1;
@@ -222,7 +222,7 @@ export class Judge {
     Object.keys(newTolajiCard)
       .sort()
       .reverse()
-      .map((h) => {
+      .forEach((h) => {
         const ch = parseInt(h);
         for (let ih = InitiatorMax; ih > 1; ih--) {
           if (newTolajiInitiator[ih] && newTolajiInitiator[ih] > 0) {
@@ -304,7 +304,7 @@ export class Judge {
     Object.keys(newTolajiCard)
       .sort()
       .reverse()
-      .map((h) => {
+      .forEach((h) => {
         const ch = parseInt(h);
         for (let ih = InitiatorMax; ih > 1; ih--) {
           if (newTolajiInitiator[ih] && newTolajiInitiator[ih] > 0) {

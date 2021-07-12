@@ -41,7 +41,7 @@ export class Action extends PIXI.Container {
   }
 
   displayCallButton(trumps: Trump[]) {
-    this.callButtons.map((c) => this.removeChild(c));
+    this.callButtons.forEach((c) => this.removeChild(c));
     let x = 0;
     this.callButtons = trumps.map((t, id) => {
       const butt = new Play(this, x, 150, t.lastCall, handTypes.USER_CALL, 0, () => {
@@ -79,7 +79,7 @@ export class Action extends PIXI.Container {
     switch (state) {
       case actionStates.PREPARE:
         this.prepareButton.visible = true;
-        this.callButtons.map((cb) => (cb.visible = false));
+        this.callButtons.forEach((cb) => (cb.visible = false));
         this.KittyButton.visible = false;
         this.PlayButton.visible = false;
 
@@ -87,28 +87,28 @@ export class Action extends PIXI.Container {
 
       case actionStates.CALL:
         this.prepareButton.visible = false;
-        this.callButtons.map((cb) => (cb.visible = true));
+        this.callButtons.forEach((cb) => (cb.visible = true));
         this.KittyButton.visible = false;
         this.PlayButton.visible = false;
 
         break;
       case actionStates.CLEAR:
         this.prepareButton.visible = false;
-        this.callButtons.map((cb) => (cb.visible = false));
+        this.callButtons.forEach((cb) => (cb.visible = false));
         this.KittyButton.visible = false;
         this.PlayButton.visible = false;
 
         break;
       case actionStates.KITTY:
         this.prepareButton.visible = false;
-        this.callButtons.map((cb) => (cb.visible = false));
+        this.callButtons.forEach((cb) => (cb.visible = false));
         this.KittyButton.visible = true;
         this.PlayButton.visible = false;
 
         break;
         case actionStates.PLAY:
           this.prepareButton.visible = false;
-          this.callButtons.map((cb) => (cb.visible = false));
+          this.callButtons.forEach((cb) => (cb.visible = false));
           this.KittyButton.visible = false;
           this.PlayButton.visible = true;
   

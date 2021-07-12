@@ -103,7 +103,7 @@ export class Hand extends PIXI.Container {
   }
 
   popCard(indices: number[]) {
-    this.cardHandler.map((c, id) => {
+    this.cardHandler.forEach((c, id) => {
       if (indices.indexOf(id) > -1) {
         c.selected = true;
         c.y = c.originY - CARD.POP_DISTANCE;

@@ -108,7 +108,7 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
   selectSuit(index: number, suit:string){
     this.tickets[index].suit = suit
     this.labelHandler[index].text = `Ticket${index+1} : ${numberToOrder(this.tickets[index].sequence)} ${cardToName(this.tickets[index].suit, this.tickets[index].number)}`
-    this.suitSelectorHandler[index].map(ssh=>{
+    this.suitSelectorHandler[index].forEach(ssh=>{
       if (ssh.data === suit) ssh.toggle(true)
       else ssh.toggle(false)
     })
@@ -116,7 +116,7 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
   selectText(index: number, number:string){
     this.tickets[index].number = number
     this.labelHandler[index].text = `Ticket${index+1} : ${numberToOrder(this.tickets[index].sequence)} ${cardToName(this.tickets[index].suit, this.tickets[index].number)}`
-    this.textSelectorHandler[index].map(ssh=>{
+    this.textSelectorHandler[index].forEach(ssh=>{
       if (ssh.data === number) ssh.toggle(true)
       else ssh.toggle(false)
     })
@@ -124,7 +124,7 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
   selectSequence(index: number, sequence:number){
     this.tickets[index].sequence = sequence
     this.labelHandler[index].text = `Ticket${index+1} : ${numberToOrder(this.tickets[index].sequence)} ${cardToName(this.tickets[index].suit, this.tickets[index].number)}`
-    this.sequenceSelectorHandler[index].map((ssh,id)=>{
+    this.sequenceSelectorHandler[index].forEach((ssh,id)=>{
       if (id === sequence-1) ssh.toggle(true)
       else ssh.toggle(false)
     })

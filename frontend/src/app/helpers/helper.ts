@@ -128,7 +128,7 @@ export const getCallableTrumps = (trump: Trump, cards: string[], userid: PlayerI
       return { ...acc, [cur]: 1 };
     }, {});
   let result: Trump[] = [];
-  Object.keys(validCardDirectory).map((k) => {
+  Object.keys(validCardDirectory).forEach((k) => {
     if ((k.slice(0, 1) !== "j" && (!trump.count || validCardDirectory[k] > trump.count)) || (k.slice(0, 1) === "j" && validCardDirectory[k] > 2)) {
       for (let index = k.slice(0, 1) === "j" ? 3 : trump.count + 1; index <= validCardDirectory[k]; index++) {
         result.push({

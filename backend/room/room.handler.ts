@@ -217,7 +217,7 @@ function startGame(io: Server, socket: Socket, room: IRoom, handRepository: InMe
 }
 function dealCard(io: Server, socket: Socket, room: IRoom, handRepository: InMemoryHandRepository) {
   const deck = newDeck();
-  room.players.map((p) => {
+  room.players.forEach((p) => {
     handRepository.init((p as Player).id);
   });
   // Dealing start from dealer or 0 when there is no dealer yet

@@ -61,7 +61,7 @@ export class GameRoom extends PIXI.Container {
   updatePlayers(room: IRoom): void {
     this.roomData = room;
     const players = this.arrangePlayer(room.players);
-    this.playerAreas.map((ph, id) => {
+    this.playerAreas.forEach((ph, id) => {
       ph.updatePlayer(players[id]);
     });
   }
@@ -72,7 +72,7 @@ export class GameRoom extends PIXI.Container {
     this.roomData = room;
     const players = this.arrangePlayer(room.players);
     const user = this.arrangeUser(room.players);
-    this.playerAreas.map((ph, id) => {
+    this.playerAreas.forEach((ph, id) => {
       ph.updateCards(players[id]?.cards);
     });
     this.userPlay.update(user.cards);

@@ -56,7 +56,7 @@ export class Lobby extends PIXI.Container {
   }
 
   listRooms(roomList: ILobbyRoom[]): void {
-    roomList.map((rm, id) => {
+    roomList.forEach((rm, id) => {
       this.displayRoom(rm, id);
     });
   }
