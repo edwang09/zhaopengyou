@@ -87,7 +87,7 @@ export class Register extends PIXI.Container {
       const userData: IPlayerData = {
         name: this.input.text,
         avatarIndex: this.avatarIndex,
-        id: this.randomString(),
+        id: uuidv4(),
       };
       this.callback(userData);
     });
@@ -97,14 +97,5 @@ export class Register extends PIXI.Container {
   modifyAvatarIndex(increment: number): number {
     this.avatarIndex = (this.avatarIndex + increment + 10) % 10;
     return this.avatarIndex;
-  }
-  randomString(length = 10): string {
-    let result = "";
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
   }
 }
