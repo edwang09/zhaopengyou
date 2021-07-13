@@ -20,7 +20,6 @@ export function createApplication(
 
 
   io.on("connection", (socket) => {
-    console.log(socket.id)
     socket.join("lobby");
     registerRoomHandlers(io, socket, components);
   });

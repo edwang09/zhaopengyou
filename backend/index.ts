@@ -6,7 +6,7 @@ import { InMemoryRoomRepository } from "./room/room.repository";
 
 const httpServer = createServer();
 
-createApplication(
+const io = createApplication(
   httpServer,
   {
     roomRepository: new InMemoryRoomRepository(),
@@ -26,3 +26,4 @@ createApplication(
 httpServer.listen(3000, ()=>{
   console.log("listening on port 3000")
 });
+module.exports = io;

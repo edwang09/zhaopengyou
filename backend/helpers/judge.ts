@@ -55,12 +55,7 @@ export class Judge {
     if (decomposeAttack.length === 0) return [false, 0];
     // defend is not dump, must win by card
     if (decomposeDefence.length === 1){
-      console.log("can beat", decomposeAttack, decomposeDefence)
-      console.log([
-        decomposeAttack.length === 1 && this.compare(decomposeAttack[0].card, decomposeDefence[0].card),
-        this.getOrder(decomposeAttack[0].card),
-      ])
-      return [
+            return [
         decomposeAttack.length === 1 && this.compare(decomposeAttack[0].card, decomposeDefence[0].card),
         this.getOrder(decomposeAttack[0].card),
       ];
