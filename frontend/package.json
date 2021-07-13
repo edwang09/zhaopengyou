@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest",
     "build": "webpack",
     "start": "webpack serve --host=0.0.0.0"
   },
@@ -28,11 +28,13 @@
     "@typescript-eslint/parser": "^4.26.0",
     "copy-webpack-plugin": "^9.0.0",
     "jest": "^27.0.4",
+    "jest-sonar-reporter": "^2.0.0",
     "ts-jest": "^27.0.3",
     "webpack": "^5.39.1",
     "webpack-cli": "^4.7.2"
   },
-  "jest":{
-    "collectCoverage": true
-    }
+  "jest": {
+    "collectCoverage": true,
+    "testResultsProcessor": "jest-sonar-reporter"
+  }
 }
