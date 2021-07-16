@@ -21,7 +21,7 @@ export class Register extends PIXI.Container {
   arrowright: ImageButton;
   avatar: PIXI.AnimatedSprite;
   label: PIXI.Text;
-  button: any;
+  button: Button;
   constructor(app: GameApp) {
     super();
     this.app = app;

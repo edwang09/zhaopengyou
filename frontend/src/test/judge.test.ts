@@ -1,6 +1,6 @@
 
-import { Judge } from "../helpers/judge";
-import { Trump } from "../interfaces/ISocket";
+import { Judge } from "../app/helpers/judge";
+import { Trump } from "../app/interfaces/ISocket";
 const trumpTest : Trump = {
     number: "02",
     suit: "h",

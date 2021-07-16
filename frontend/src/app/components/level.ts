@@ -11,13 +11,13 @@ const levelArray = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K",
 export class Level extends PIXI.Sprite {
   hud: Hud;
     text: PIXI.Text;
-  constructor(hud: Hud, level:number) {
+  constructor(hud: Hud, level:string) {
     super(PIXI.Loader.shared.resources["star"].texture);
     this.hud = hud;
-    this.text = addText(this, levelArray[level], TSlevel);
+    this.text = addText(this, level, TSlevel);
     renderSprite(this, this.hud, 30, 45);
   }
-  updateLevel(level:number):void{
-      this.text.text = levelArray[level]
+  updateLevel(level:string):void{
+      this.text.text = level
   }
 }

@@ -21,10 +21,12 @@ export class GameApp extends PIXI.Application{
   gameroom: GameRoom;
   lobby: Lobby;
   background: Background;
+  register: Register;
 
   constructor(parent: HTMLElement, width: number, height: number) {
-    super({width, height});
-    parent.replaceChild(this.view, parent.lastElementChild); // Hack for parcel HMR
+    super({width, height, forceCanvas:true});
+    document.body.appendChild(this.view);
+    // if(parent.lastElementChild) parent.replaceChild(this.view, parent.lastElementChild); // Hack for parcel HMR
 
     const loader: Loader = new Loader();
     loader.load(this.onAssetsLoaded.bind(this));
@@ -156,11 +158,11 @@ export class GameApp extends PIXI.Application{
     const user = window.sessionStorage.getItem("userData");
     const roomid = window.sessionStorage.getItem("roomId");
     if (user === null) {
-      const register: Register = new Register(this);
-      register.show((userData: Player) => {
+      this.register = new Register(this);
+      this.register.show((userData: Player) => {
         window.sessionStorage.setItem("userData", JSON.stringify(userData));
         this.userData = userData;
-        register.hide();
+        this.register.hide();
         this.lobby.show();
         console.log("lobby")
       });
