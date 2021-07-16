@@ -7,7 +7,7 @@ test("basic", () => {
 const roomTemplate:IRoom = {
   id:"template",
   name:"template",
-  startLevel: 2,
+  startLevel: "02",
   players:[
     {id : "0", name:"0", avatarIndex:0,socketid:"socket0", cards:["s14"],points:[], camp:playerCamp.UNKNOWN},
     {id : "1", name:"1", avatarIndex:1,socketid:"socket1", cards:[],points:[], camp:playerCamp.UNKNOWN},

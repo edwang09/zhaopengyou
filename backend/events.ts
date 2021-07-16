@@ -36,7 +36,8 @@ export interface ClientEvents {
   "lobby:join": (roomid: RoomID,player: Player, callback: (res?: Response<{room: IRoom, hand?: string[]}>) => void) => void;
   "lobby:leave": (roomid: RoomID,playerid: PlayerID) => void;
   "lobby:create": (
-    payload: Omit<IRoom, "id">,
+    newRoom: {name:string, startLevel:string}, 
+    player:Player,
     callback: (res: Response<IRoom>) => void
   ) => void;
   "room:prepare": (roomid: RoomID,playerid: PlayerID,prepare:boolean) =>void

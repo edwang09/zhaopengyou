@@ -19,7 +19,7 @@ export interface Player {
   name: string;
   avatarIndex: number;
   socketid?: string;
-  level?: number,
+  level?: string,
   camp?: playerCamp
   prepared?: boolean;
   cards: string[];
@@ -49,7 +49,7 @@ export interface IRoom {
   id?: RoomID;
   name: string;
   players: (Player | null)[];
-  startLevel: number
+  startLevel: string
   dealerIndex?:number
   initiatorIndex?:number
   trump:Trump
@@ -75,7 +75,8 @@ export interface ServerEvents {
     "lobby:list": () => void;
   
     "lobby:create": (
-      payload: Omit<IRoom, "id">,
+      newRoom: {name:string, startLevel:string}, 
+      player:Player,
       callback: (res: Response<IRoom>) => void
     ) => void;
     "lobby:join": (roomid: RoomID,player: Player, callback: (res?: Response<{room: IRoom, hand?: string[]}>) => void) => void;

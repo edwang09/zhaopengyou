@@ -49,9 +49,9 @@ export class GameApp extends PIXI.Application{
           name: name || `${this.userData.name}'s room`,
           players: [this.userData, null, null, null, null, null],
           trump: {number:"02", count:0, lastCall:[]},
-          startLevel: 0,
+          startLevel: "02",
         };
-        this.socket.emit("lobby:create", room, (res: Response<IRoom>) => {
+        this.socket.emit("lobby:create", room,this.userData, (res: Response<IRoom>) => {
           if ("error" in res) {
             console.error(res);
           } else {

@@ -30,22 +30,29 @@ export function registerRoomHandlers(
       }
     });
   });
-  socket.on("lobby:create", async function (payload: Omit<IRoom, "id">, callback: (res: Response<IRoom>) => void) {
+  socket.on("lobby:create", async function (newRoom: {name:string, startLevel:string}, player:Player, callback: (res: Response<IRoom>) => void) {
     // validate the payload
-    const value = payload as unknown as IRoom;
-    value.id = uuid();
-    value.players[0].socketid = socket.id;
-    value.players[0].actionState = actionStates.PREPARE;
-    value.players[0].level = payload.startLevel;
-    value.players[0].points = [];
-    value.players[0].cards = [];
+    const room:IRoom = {...newRoom, id: uuid(),
+    players:[]}; 
+    room.trump = {
+      number: room.startLevel, 
+      count:0
+    }
+    room.players = [{...player,
+      socketid: socket.id,
+      level:newRoom.startLevel,
+      actionState : actionStates.PREPARE,
+      points:[],
+      cards:[]
+    }, null, null, null, null, null
+    ]
 
     // persist the entity
     try {
-      await roomRepository.save(value);
-      socket.join(value.id);
+      await roomRepository.save(room);
+      socket.join(room.id);
       socket.leave("lobby");
-      io.to("lobby").emit("lobby:created", StripeRoom(value));
+      io.to("lobby").emit("lobby:created", StripeRoom(room));
     } catch (e) {
       return callback({
         error: sanitizeErrorMessage(e),
@@ -54,9 +61,10 @@ export function registerRoomHandlers(
 
     // acknowledge the creation
     callback({
-      data: value,
+      data: room,
     });
   });
+
   socket.on("lobby:join", async function (roomid: RoomID, player: Player, callback: (res: Response<{ room: IRoom; hand?: string[] }>) => void) {
     const { error } = idSchema.validate(roomid);
     if (error) {
@@ -118,6 +126,7 @@ export function registerRoomHandlers(
       const room: IRoom = await roomRepository.removePlayerById(roomid, playerid);
       io.to(roomid).emit("room:player:updated", room);
       socket.join("lobby");
+      socket.leave(roomid);
       io.to("lobby").emit("lobby:updated", StripeRoom(room));
     } catch (e) {
       console.error(e);

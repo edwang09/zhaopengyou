@@ -31,7 +31,7 @@ export interface Player {
   name: string;
   avatarIndex: number;
   socketid: string;
-  level?: number;
+  level?: string;
   camp: playerCamp;
   prepared?: boolean;
   cards: string[];
@@ -60,11 +60,11 @@ export interface ILobbyRoom {
 export interface IRoom {
   id: RoomID;
   name: string;
-  startLevel: number
+  startLevel: string
   players: (Player | null)[];
   dealerIndex?:number
   initiatorIndex?:number
-  trump:Trump
+  trump?:Trump
   kitty?:string[]
   tickets?:Ticket[]
 }
