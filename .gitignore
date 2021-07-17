@@ -7,3 +7,5 @@ experiments
 .terraform
 **.tfvars
 **/coverage
+!/frontend/coverage/lcov.info
+!/backend/coverage/lcov.info
