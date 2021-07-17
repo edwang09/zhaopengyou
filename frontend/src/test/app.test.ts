@@ -1,4 +1,4 @@
-import { Loader } from "pixi.js";
+import {Loader} from "../app/loader"
 import { GameApp } from "../app/app";
 import { Background } from "../app/background";
 import { playerCamp } from "../app/enums/enums";
@@ -36,18 +36,7 @@ describe("app test", () => {
         app.userData = roomTemplate.players[0]
         app.arrangeRoom(roomTemplate)
         done();
-
     });
     
   });
-
-  // test("new background",(done)=>{
-
-  //     const loader = new Loader()
-  //     loader.load(()=>{
-  //         console.log("loaded")
-  //         console.log(PIXI.Loader.shared.resources)
-  //         done()
-  //     })
-  // })
 });

@@ -29,6 +29,7 @@
     "@typescript-eslint/parser": "^4.26.0",
     "canvas": "^2.8.0",
     "copy-webpack-plugin": "^9.0.0",
+    "file-loader": "^6.2.0",
     "http-server": "^0.12.3",
     "jest": "^27.0.4",
     "jest-canvas-mock": "^2.3.1",
@@ -48,12 +49,8 @@
       "jest-webgl-canvas-mock",
       "jest-localstorage-mock"
     ],
-    "testEnvironmentOptions": {
-      "resources": "usable"
-    },
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
-      "\\.(css|less)$": "<rootDir>/__mocks__/styleMock.js"
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js"
     }
   }
 }

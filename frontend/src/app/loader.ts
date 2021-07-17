@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+// import background from "../../public/assets/background.png"
 
 export class Loader {
   _callback: () => void;
