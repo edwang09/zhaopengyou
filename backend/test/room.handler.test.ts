@@ -25,8 +25,6 @@ describe("room handler tests", () => {
   });
 
   test("should create and join lobby", (done) => {
-    serverSocket.on("lobby:create", () => {
-    });
     serverSocket.on("lobby:join", () => {
       expect(serverSocket.rooms).toContain(roomid);
     });

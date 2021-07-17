@@ -5,10 +5,6 @@ describe("hand repository tests", () => {
     beforeAll(() => {
         testHandRepository = new InMemoryHandRepository()
     });
-  
-    afterAll(() => {
-    });
-  
     test("should init hand", (done) => {
         testHandRepository.init("test").then(()=>{
             done()

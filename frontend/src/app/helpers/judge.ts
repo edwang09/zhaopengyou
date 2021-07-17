@@ -143,7 +143,13 @@ export class Judge {
     }
     return cards;
   }
-
+  groupByCount (summarizedCard:Record<string, number>):Record<number, string[]>{
+    return Object.keys(summarizedCard).reduce((acc, curr) => {
+      if (acc[summarizedCard[curr]])
+        return { ...acc, [summarizedCard[curr]]: [...acc[summarizedCard[curr]], this.getOrder(curr)].sort((a, b) => a - b) };
+      return { ...acc, [summarizedCard[curr]]: [this.getOrder(curr)] };
+    }, {});
+  } 
   //decompose cards into groups
   decompose(cards: string[]): { width: number; height: number; card: string }[] {
     // if all suits not match return empty string
@@ -153,11 +159,7 @@ export class Judge {
       return [{ card: Object.keys(summarizedCard)[0], width: Object.values(summarizedCard)[0], height: 1 }];
     const suit = this.getSuit(cards[0]);
     // group by count
-    const groupByCount = Object.keys(summarizedCard).reduce((acc, curr) => {
-      if (acc[summarizedCard[curr]])
-        return { ...acc, [summarizedCard[curr]]: [...acc[summarizedCard[curr]], this.getOrder(curr)].sort((a, b) => a - b) };
-      return { ...acc, [summarizedCard[curr]]: [this.getOrder(curr)] };
-    }, {});
+    const groupByCount = this.groupByCount(summarizedCard)
     // reduce to Tolaji if any
     return Object.keys(groupByCount)
       .sort()

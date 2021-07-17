@@ -17,8 +17,6 @@ describe("room repository tests", () => {
     testRoomRepository = new InMemoryRoomRepository();
   });
 
-  afterAll(() => {});
-
   test("should save room", (done) => {
     testRoomRepository.save(testRoom).then(() => {
       done();

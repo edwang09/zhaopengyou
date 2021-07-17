@@ -24,7 +24,7 @@ export class GameApp extends PIXI.Application{
   register: Register;
   cb: () => void;
 
-  constructor(parent: HTMLElement, width: number, height: number, cb = ()=>{}) {
+  constructor(parent: HTMLElement, width: number, height: number, cb:() => void = null) {
     super({width, height, forceCanvas:true});
     this.cb = cb
     document.body.appendChild(this.view);
