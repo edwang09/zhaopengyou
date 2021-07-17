@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest --coverage --env=jsdom",
     "build": "webpack",
+    "serve-test": "http-server -p 80",
     "start": "webpack serve --host=0.0.0.0"
   },
   "keywords": [],
@@ -28,8 +29,10 @@
     "@typescript-eslint/parser": "^4.26.0",
     "canvas": "^2.8.0",
     "copy-webpack-plugin": "^9.0.0",
+    "http-server": "^0.12.3",
     "jest": "^27.0.4",
     "jest-canvas-mock": "^2.3.1",
+    "jest-localstorage-mock": "^2.4.14",
     "jest-sonar-reporter": "^2.0.0",
     "jest-webgl-canvas-mock": "^0.2.3",
     "ts-jest": "^27.0.3",
@@ -37,8 +40,20 @@
     "webpack-cli": "^4.7.2"
   },
   "jest": {
+    "automock": true,
     "collectCoverage": true,
     "testResultsProcessor": "jest-sonar-reporter",
-    "setupFiles": ["jest-canvas-mock", "jest-webgl-canvas-mock"]
+    "setupFiles": [
+      "jest-canvas-mock",
+      "jest-webgl-canvas-mock",
+      "jest-localstorage-mock"
+    ],
+    "testEnvironmentOptions": {
+      "resources": "usable"
+    },
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+      "\\.(css|less)$": "<rootDir>/__mocks__/styleMock.js"
+    }
   }
 }

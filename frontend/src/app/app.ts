@@ -22,23 +22,28 @@ export class GameApp extends PIXI.Application{
   lobby: Lobby;
   background: Background;
   register: Register;
+  cb: () => void;
 
-  constructor(parent: HTMLElement, width: number, height: number) {
+  constructor(parent: HTMLElement, width: number, height: number, cb = ()=>{}) {
     super({width, height, forceCanvas:true});
+    this.cb = cb
     document.body.appendChild(this.view);
     // if(parent.lastElementChild) parent.replaceChild(this.view, parent.lastElementChild); // Hack for parcel HMR
 
     const loader: Loader = new Loader();
     loader.load(this.onAssetsLoaded.bind(this));
+    console.log("app created")
   }
 
-  private onAssetsLoaded() {
+  onAssetsLoaded() {
+    console.log("app asset loaded")
     this.eventHandler = new EventEmitter();
     this.handleEvents();
     this.socket = io(SERVER_URL);
     this.handleSocket();
     this.background = new Background(this);
     this.lobby = new Lobby(this);
+    this.cb()
   }
   handleEvents(): void {
     this.eventHandler
@@ -155,8 +160,8 @@ export class GameApp extends PIXI.Application{
   }
 
   registerUser(): void {
-    const user = window.sessionStorage.getItem("userData");
-    const roomid = window.sessionStorage.getItem("roomId");
+    const user = window && window.sessionStorage ? window.sessionStorage.getItem("userData") : undefined;
+    const roomid = window && window.sessionStorage ? window.sessionStorage.getItem("roomId") : undefined;
     if (user === null) {
       this.register = new Register(this);
       this.register.show((userData: Player) => {

@@ -12,8 +12,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: Frontend resource serve
+      run: cd frontend && npm install && npm run serve-test
+
     - name: Frontend test
-      run: cd frontend && npm install && npm run test
+      run: cd frontend &&  npm run test
 
     - name: Backend test
       run: cd backend && npm install && npm run test
@@ -26,8 +29,11 @@ jobs:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
     
+    - name: Frontend resource serve
+      run: cd frontend && npm install && npm run serve-test
+    
     - name: Frontend test
-      run: cd frontend && npm install && npm run test
+      run: cd frontend && npm run test
 
     - name: Backend test
       run: cd backend && npm install && npm run test
