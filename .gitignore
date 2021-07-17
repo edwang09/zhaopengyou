@@ -6,6 +6,6 @@ keys
 experiments
 .terraform
 **.tfvars
-**/coverage
-!/frontend/coverage/lcov.info
-!/backend/coverage/lcov.info
+**/coverage/lcov-report
+**/coverage/clover.xml
+**/coverage/coverage-final.json
