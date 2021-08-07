@@ -8,7 +8,7 @@ import { Register } from "./register";
 import { GameRoom } from "./gameroom";
 import { Response, IRoom, ILobbyRoom, ClientEvents, ServerEvents, RoomID, Trump, Ticket, Player } from "./interfaces/ISocket";
 import { actionStates } from "./enums/enums";
-const SERVER_URL = "ws://192.168.86.26:3000";
+const SERVER_URL = "/ws";
 
 export class GameApp extends PIXI.Application{
   //util
