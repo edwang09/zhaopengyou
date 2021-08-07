@@ -33,9 +33,11 @@ run:
 	make ssh-cmd COMMENT="docker run" CMD='docker run -d --network zpy --network-alias backend --name=$(BACKEND_CONTAINER) $(BACKEND_TAG) && docker run -d --network zpy --network-alias frontend --name=$(FRONTEND_CONTAINER) -p 80:80 $(FRONTEND_TAG)' 
 
 dev:
-	docker-compose up
+	ENV=dev docker-compose up
 dev-build:
-	docker-compose up --build
+	ENV=dev docker-compose up --build
+build-dev:
+	docker-compose build --build-arg ENV=dev
 build:
 	docker-compose build --build-arg ENV=prod
 push:

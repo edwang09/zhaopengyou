@@ -8,7 +8,9 @@ import { Register } from "./register";
 import { GameRoom } from "./gameroom";
 import { Response, IRoom, ILobbyRoom, ClientEvents, ServerEvents, RoomID, Trump, Ticket, Player } from "./interfaces/ISocket";
 import { actionStates } from "./enums/enums";
-const SERVER_URL = "/ws";
+// const SERVER_URL = "/ws/";
+const SERVER_URL = "http://localhost:3000";
+// const SERVER_URL = "http://localhost:80/ws/";
 
 export class GameApp extends PIXI.Application{
   //util
@@ -40,6 +42,7 @@ export class GameApp extends PIXI.Application{
     console.log("app asset loaded")
     this.eventHandler = new EventEmitter();
     this.handleEvents();
+    console.log(SERVER_URL)
     this.socket = io(SERVER_URL);
     this.handleSocket();
     this.background = new Background(this);
