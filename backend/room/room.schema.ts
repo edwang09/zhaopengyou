@@ -35,6 +35,7 @@ export interface Player {
   camp: playerCamp;
   prepared?: boolean;
   cards: string[];
+  lastplay?: string[];
   points: string[];
   actionState?:number
 }
@@ -51,6 +52,18 @@ export interface Trump {
   callerId?: string
   lastCall?: string[]
 }
+
+export interface Kitty {
+  cards: string[],
+  multiplier: number,
+  point?: number
+}
+export interface Checkout {
+  winningParty: string,
+  winnerIndex: number[],
+  advancement: number,
+  totalPoint: number
+}
 export interface ILobbyRoom {
   id: RoomID;
   name: string;
@@ -65,6 +78,8 @@ export interface IRoom {
   dealerIndex?:number
   initiatorIndex?:number
   trump?:Trump
-  kitty?:string[]
+  kitty?:Kitty
   tickets?:Ticket[]
+  cardLeft?:number
+  checkout?:Checkout
 }

@@ -77,7 +77,9 @@ export class Hand extends PIXI.Container {
     id = id % linemax;
     return (1 + id) * CARD.NORMAL_GAP;
   }
-
+  toggleInteractive(interactive=true){
+    this.interactive = interactive
+  }
   //TODO: fix this, dont rerender everything
   pushCard(cards: string[]) {
     let newCards = [...this.cards, ...cards];

@@ -19,15 +19,15 @@ export class Options extends PIXI.Container {
       PIXI.Loader.shared.resources["icon"].textures["info.png"]
     );
     info.anchor.set(0.5, 0)
-    info.x = OPTIONS.OFFSET_X + OPTIONS.GAP *3;
+    info.x = OPTIONS.OFFSET_X + OPTIONS.GAP *2;
     info.y = OPTIONS.OFFSET_Y;
 
-    const leader: PIXI.Sprite = PIXI.Sprite.from(
-      PIXI.Loader.shared.resources["icon"].textures["leader.png"]
-    );
-    leader.anchor.set(0.5, 0)
-    leader.x = OPTIONS.OFFSET_X + OPTIONS.GAP * 1;
-    leader.y = OPTIONS.OFFSET_Y;
+    // const leader: PIXI.Sprite = PIXI.Sprite.from(
+    //   PIXI.Loader.shared.resources["icon"].textures["leader.png"]
+    // );
+    // leader.anchor.set(0.5, 0)
+    // leader.x = OPTIONS.OFFSET_X + OPTIONS.GAP * 1;
+    // leader.y = OPTIONS.OFFSET_Y;
 
     const reverse: PIXI.Sprite = PIXI.Sprite.from(
       PIXI.Loader.shared.resources["icon"].textures["reverse.png"]
@@ -40,28 +40,27 @@ export class Options extends PIXI.Container {
       PIXI.Loader.shared.resources["icon"].textures["audio.png"]
     );
     audio.anchor.set(0.5, 0)
-    audio.x = OPTIONS.OFFSET_X + OPTIONS.GAP * 4;
+    audio.x = OPTIONS.OFFSET_X + OPTIONS.GAP * 3;
     audio.y = OPTIONS.OFFSET_Y;
 
     const setting: PIXI.Sprite = PIXI.Sprite.from(
       PIXI.Loader.shared.resources["icon"].textures["setting.png"]
     );
     setting.anchor.set(0.5, 0)
-    setting.x = OPTIONS.OFFSET_X + OPTIONS.GAP * 2;
+    setting.x = OPTIONS.OFFSET_X + OPTIONS.GAP * 1;
     setting.y = OPTIONS.OFFSET_Y;
 
     this.addChild(info);
-    this.addChild(leader);
+    // this.addChild(leader);
     this.addChild(reverse);
     this.addChild(audio);
     this.addChild(setting);
 
     makeInteractive(info, () => {
-      console.log("info");
     });
-    makeInteractive(leader, () => {
-      console.log("leader");
-    });
+    // makeInteractive(leader, () => {
+    //   console.log("leader");
+    // });
     makeInteractive(reverse, () => {
       this.room.app.eventHandler.emit("room:leave")
     });

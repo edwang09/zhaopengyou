@@ -143,15 +143,16 @@ export class Judge {
     }
     return cards;
   }
-  groupByCount (summarizedCard:Record<string, number>):Record<number, string[]>{
+  groupByCount (summarizedCard:Record<string, number>, limit = 10):Record<number, string[]>{
     return Object.keys(summarizedCard).reduce((acc, curr) => {
-      if (acc[summarizedCard[curr]])
-        return { ...acc, [summarizedCard[curr]]: [...acc[summarizedCard[curr]], this.getOrder(curr)].sort((a, b) => a - b) };
-      return { ...acc, [summarizedCard[curr]]: [this.getOrder(curr)] };
+      const key = summarizedCard[curr] > limit ? limit : summarizedCard[curr]
+      if (acc[key])
+        return { ...acc, [key]: [...acc[key], this.getOrder(curr)].sort((a, b) => a - b) };
+      return { ...acc, [key]: [this.getOrder(curr)] };
     }, {});
   } 
   //decompose cards into groups
-  decompose(cards: string[]): { width: number; height: number; card: string }[] {
+  decompose(cards: string[], limit = 10): { width: number; height: number; card: string }[] {
     // if all suits not match return empty string
     const summarizedCard: Record<string, number> = this.summarizeCard(cards);
     if (Object.keys(summarizedCard).length === 0 || !this.checkSuitMatch(cards)) return [];
@@ -159,7 +160,7 @@ export class Judge {
       return [{ card: Object.keys(summarizedCard)[0], width: Object.values(summarizedCard)[0], height: 1 }];
     const suit = this.getSuit(cards[0]);
     // group by count
-    const groupByCount = this.groupByCount(summarizedCard)
+    const groupByCount = this.groupByCount(summarizedCard, limit)
     // reduce to Tolaji if any
     return Object.keys(groupByCount)
       .sort()
@@ -174,14 +175,14 @@ export class Judge {
             }),
           ];
         } else {
-          const sequenceList = groupByCount[count];
+          const sequenceList = groupByCount[count].sort((a,b)=>a-b);;
           let height = 1;
           let card = this.getCardFromOrder(sequenceList[0], suit);
           for (let index = 1; index < sequenceList.length; index++) {
             if (sequenceList[index] - sequenceList[index - 1] === 1) {
               height++;
             } else if (sequenceList[index] - sequenceList[index - 1] === 0) {
-              total = [...total, { width, height: 1, card }];
+              total = [...total, { width, height: 1, card:this.getCardFromOrder(sequenceList[index], suit) }];
             } else {
               total = [...total, { width, height, card }];
               height = 1;
@@ -245,20 +246,23 @@ export class Judge {
   }
   canPlayAsFollower(cards: string[], hands: string[], initiator: string[]): boolean {
     if (initiator.length === 0) throw new Error("empty initiator cards");
+    const suithands = hands.filter((h) => this.getSuit(h) === this.getSuit(initiator[0]))
+    const lefthands = Object.assign([], suithands)
+    cards.forEach((c)=>{
+      if (lefthands.indexOf(c) > -1) lefthands.splice(lefthands.indexOf(c), 1)
+    })
     const decomposedCard = this.decompose(cards);
-    const decomposedHand = this.decompose(hands.filter((h) => this.getSuit(h) === this.getSuit(initiator[0])));
+    const decomposedSuitCard = this.decompose(cards.filter((h) => this.getSuit(h) === this.getSuit(initiator[0])));
+    const decomposedLeftHand = this.decompose(lefthands);
+    const decomposedSuitHand = this.decompose(suithands);
     const decomposedInitiator = this.decompose(initiator);
-    if (initiator.length !== cards.length) {
-      console.log("can play as follower: length", false);
-      return false;
-    }
-    if (!this.checkSuitFullfillmentAsFollower(cards, initiator, hands)) {
-      console.log("can play as follower: suit", false);
-      return false;
-    }
+    if (initiator.length !== cards.length) return false
+    if (!this.checkSuitFullfillmentAsFollower(cards, initiator, lefthands)) return false;
+    if (lefthands.length === 0) return true
     return (
-      this.checkPairFullfillmentAsFollower(decomposedCard, decomposedHand, decomposedInitiator) &&
-      this.checkTolajiFullfillmentAsFollower(decomposedCard, decomposedHand, decomposedInitiator)
+      this.checkPairFullfillmentAsFollower(decomposedSuitCard, decomposedSuitHand, decomposedInitiator) &&
+      // this.checkTolajiFullfillmentAsFollower(decomposedCard, decomposedSuitHand, decomposedInitiator)
+      this.checkTolajiFullfillmentAsFollower(cards, suithands, decomposedInitiator)
     );
   }
   checkPairFullfillmentAsFollower(
@@ -266,11 +270,14 @@ export class Judge {
     decomposedHand: { width: number; height: number; card: string }[],
     decomposedInitiator: { width: number; height: number; card: string }[]
   ) {
+    // console.log(decomposedInitiator,decomposedHand,decomposedCard)
     const pairInitiator = this.getPairDirectoryFromDecompose(decomposedInitiator);
     const pairAll = this.getPairDirectoryFromDecompose(decomposedHand);
     const pairCard = this.getPairDirectoryFromDecompose(decomposedCard);
+    // when 4 from initiator countered by 3 from picked cards, 4 is not treated as 2 2s anymore, therefore remove the doubled 4s 
+    pairInitiator[2] = pairInitiator[2] - Math.min(pairCard[3], pairInitiator[4])
     console.log(
-      "can play as follower: pair",
+      "can play as follower: pair",pairInitiator,pairAll, pairCard,
       (pairCard[4] === pairAll[4] || pairCard[4] >= pairInitiator[4]) &&
         (pairCard[3] === pairAll[3] || pairCard[3] >= pairInitiator[3]) &&
         (pairCard[2] === pairAll[2] || pairCard[2] >= pairInitiator[2])
@@ -282,23 +289,63 @@ export class Judge {
     );
   }
   checkSuitFullfillmentAsFollower(cards: string[], initiator: string[], hands: string[]) {
+    // console.log("suit fullfill", cards, initiator, hands)
     if (cards.length === 0 || initiator.length === 0) return false;
     // either the suit is match and fullfilled or there is no hand left to add
-    return (this.checkSuitMatch(cards) && this.getSuit(cards[0]) === this.getSuit(initiator[0])) || hands.length <= initiator.length;
+    return (this.checkSuitMatch(cards) && this.getSuit(cards[0]) === this.getSuit(initiator[0])) || hands.length === 0;
   }
   checkTolajiFullfillmentAsFollower(
-    decomposedCard: { width: number; height: number; card: string }[],
-    decomposedHand: { width: number; height: number; card: string }[],
+    cards: string[],
+    hands: string[],
     decomposedInitiator: { width: number; height: number; card: string }[]
   ) {
+    const decomposedHand = this.decompose(hands, 2)
+    const decomposedCard = this.decompose(cards, 2)
+    // console.log("getTolajiDirectoryFromDecompose",decomposedCard, decomposedHand, decomposedInitiator)
     const tolajiInitiator = this.getTolajiDirectoryFromDecompose(decomposedInitiator);
     const tolajiAll = this.getTolajiDirectoryFromDecompose(decomposedHand);
     const tolajiCard = this.getTolajiDirectoryFromDecompose(decomposedCard);
+    // console.log("getTolajiDirectoryFromDecompose",tolajiInitiator, tolajiAll, tolajiCard)
     const offsetTolajiAll = this.offsetTolajiDirectoryFromDecompose(tolajiAll, tolajiInitiator);
     const offsetTolajiCard = this.offsetTolajiDirectoryFromDecompose(tolajiCard, tolajiInitiator);
-    console.log("can play as follower: tlj", _.isEqual(offsetTolajiAll, offsetTolajiCard));
+    // console.log("offsetTolajiDirectoryFromDecompose", offsetTolajiAll, offsetTolajiCard)
+    // console.log("can play as follower: tlj", _.isEqual(offsetTolajiAll, offsetTolajiCard));
     return _.isEqual(offsetTolajiAll, offsetTolajiCard);
   }
+
+  // checkTolajiFullfillmentAsFollower(
+  //   decomposedInitiator: { width: number; height: number; card: string }[],
+  //   hands: string[],
+  //   cards: string[]
+  // ) {
+  //   console.log("getTolajiDirectoryFromDecompose",decomposedInitiator, hands, cards)
+  //   const tolajiInitiator = this.getTolajiDirectoryFromDecompose(decomposedInitiator);
+  //   Object.keys(tolajiInitiator).forEach(width=>{
+  //     const height = tolajiInitiator[width]
+  //     const tolajiHand = this.getTolajiDirectoryFromDecompose(this.decompose(hands, 2))
+  //     const tolajiCard = this.getTolajiDirectoryFromDecompose(this.decompose(cards, 2))
+  //     const offsetTolajiHand = this.offsetTolajiDirectoryFromDecompose(tolajiHand, tolajiInitiator);
+  //     const offsetTolajiCard = this.offsetTolajiDirectoryFromDecompose(tolajiCard, tolajiInitiator);
+  //     console.log("offsetTolajiDirectoryFromDecompose", offsetTolajiHand, offsetTolajiCard)
+
+  //   })
+
+
+
+  //   const tolajiAll = this.getTolajiDirectoryFromDecompose(decomposedHand);
+  //   console.log("getTolajiDirectoryFromDecompose",tolajiInitiator, tolajiAll, tolajiCard)
+  //   const offsetTolajiAll = this.offsetTolajiDirectoryFromDecompose(tolajiAll, tolajiInitiator);
+  //   const offsetTolajiCard = this.offsetTolajiDirectoryFromDecompose(tolajiCard, tolajiInitiator);
+  //   console.log("offsetTolajiDirectoryFromDecompose", offsetTolajiAll, offsetTolajiCard)
+  //   console.log("can play as follower: tlj", _.isEqual(offsetTolajiAll, offsetTolajiCard));
+  //   return _.isEqual(offsetTolajiAll, offsetTolajiCard);
+  // }
+
+
+
+
+
+
   offsetTolajiDirectoryFromDecompose(tolajiCard: Record<number, number>, tolajiInitiator: Record<number, number>) {
     const newTolajiInitiator = Object.assign({}, tolajiInitiator);
     const newTolajiCard = Object.assign({}, tolajiCard);

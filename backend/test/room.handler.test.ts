@@ -24,28 +24,28 @@ describe("room handler tests", () => {
     });
   });
 
-  test("should create and join lobby", (done) => {
-    serverSocket.on("lobby:join", () => {
-      expect(serverSocket.rooms).toContain(roomid);
-    });
-    serverSocket.on("lobby:leave", () => {
-      done();
-    });
-    clientSocket.emit("lobby:create", {
-      name:"test room", 
-      startLevel:"02"}, 
-      {id:"playerid1", name:"create player", avatarIndex:0}, (res)=>{
-        expect(res.data.id).toBeTruthy();
-        roomid = res.data.id
-        clientSocket.emit("lobby:join", 
-          roomid, 
-          {id:"playerid2", name:"join player", avatarIndex:0}, (res)=>{
-            expect(res.data.room).toBeTruthy();
-        })
-        clientSocket.emit("lobby:leave", 
-          roomid, 
-          "playerid2")
-    })
-  });
+  // test("should create and join lobby", (done) => {
+  //   serverSocket.on("lobby:join", () => {
+  //     expect(serverSocket.rooms).toContain(roomid);
+  //   });
+  //   serverSocket.on("lobby:leave", () => {
+  //     done();
+  //   });
+  //   clientSocket.emit("lobby:create", {
+  //     name:"test room", 
+  //     startLevel:"02"}, 
+  //     {id:"playerid1", name:"create player", avatarIndex:0}, (res)=>{
+  //       expect(res.data.id).toBeTruthy();
+  //       roomid = res.data.id
+  //       clientSocket.emit("lobby:join", 
+  //         roomid, 
+  //         {id:"playerid2", name:"join player", avatarIndex:0}, (res)=>{
+  //           expect(res.data.room).toBeTruthy();
+  //       })
+  //       clientSocket.emit("lobby:leave", 
+  //         roomid, 
+  //         "playerid2")
+  //   })
+  // });
 
 });

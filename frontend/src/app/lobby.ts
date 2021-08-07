@@ -17,6 +17,7 @@ export class Lobby extends PIXI.Container {
   pageTag: PIXI.Sprite;
   arrowleft: ImageButton;
   arrowright: ImageButton;
+  logout: Button;
   constructor(app: GameApp) {
     super();
     this.app = app;
@@ -28,11 +29,21 @@ export class Lobby extends PIXI.Container {
     this.displayBackground();
     this.displayNavigator();
     this.displayCreateButton();
+    this.displayLogout()
   }
 
   displayBackground(): void {
     this.background = PIXI.Sprite.from(PIXI.Loader.shared.resources["modal-wide"].texture);
     renderSprite(this.background, this);
+  }
+  displayLogout(): void {
+    this.logout = new Button(buttonColor.RED, "log out", ()=>{
+      window.sessionStorage.removeItem("roomId");
+      window.sessionStorage.removeItem("userData");
+      this.hide()
+      this.app.registerUser()
+    })
+    renderSprite(this.logout, this, 420, -320);
   }
   displayCreateButton(): void {
     const createButton = new Button(buttonColor.GREEN, "Create", () => {

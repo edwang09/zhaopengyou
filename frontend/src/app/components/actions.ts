@@ -111,6 +111,7 @@ export class Action extends PIXI.Container {
           this.callButtons.forEach((cb) => (cb.visible = false));
           this.KittyButton.visible = false;
           this.PlayButton.visible = true;
+          console.log(this.PlayButton)
   
           break;
     }

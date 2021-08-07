@@ -1,5 +1,7 @@
 import * as PIXI from "pixi.js";
+import { cards } from "../constants/cards";
 import { IRoom, PlayerID, Trump } from "../interfaces/ISocket";
+import { Judge } from "./judge";
 import { canPlay } from "./validation";
 
 export const addText = (sprite: PIXI.Sprite, textMessage: string, style: PIXI.TextStyle, x = 0, y = 0): PIXI.Text => {
@@ -58,6 +60,9 @@ export const makeInteractive = (sprite: PIXI.Sprite, fn: () => void): void => {
     })
     .on("click", () => {
       fn();
+    })
+    .on("touchend", () => {
+      fn();
     });
 };
 const onButtonDown = (sprite: PIXI.Sprite): void => {
@@ -100,7 +105,7 @@ export const makeContainerInteractive = (container: PIXI.Container, fn: () => vo
 };
 
 export const sortHand = (cards: string[], trump: Trump): string[] => {
-  const jokerSort = cards.filter((c) => c.slice(0, 1) === "j").sort();
+  const jokerSort = cards.filter((c) => c.slice(0, 1) === "j").sort().reverse();
   const trumpDSort = cards.filter((c) => c.slice(0, 1) !== "j" && c.slice(0, 1) === trump.suit && c.slice(1) === trump.number);
   const trumpSort = cards.filter((c) => c.slice(0, 1) !== "j" && c.slice(0, 1) !== trump.suit && c.slice(1) === trump.number).sort();
   const trumpSuitSort = cards
@@ -154,7 +159,7 @@ export const getPopCardIndex = (hand: string[], picked: number[], card: string, 
 
 export const numberToOrder = (n?: number): string => {
   if (n === undefined) return "??th";
-  return ["First", "Second", "Third", "Forth"][n-1];
+  return ["First", "Second", "Third", "Forth"][n];
 };
 
 export const cardToName = (suit?: string, number?: string): string => {
@@ -203,3 +208,22 @@ export const numberToName = (number: string): string => {
   };
   return numbers[number];
 };
+
+export const getPoints= (cards: string[]): number =>{
+  let total = 0
+  cards.forEach(c=>{
+    switch (c.slice(1)) {
+      case "05":
+        total+= 5;
+        break;
+      case "10":
+        total+= 10;
+        break;
+      case "13":
+        total+= 10;
+        break;
+      default:
+    }
+  })
+  return total
+}

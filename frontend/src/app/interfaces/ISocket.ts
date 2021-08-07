@@ -23,6 +23,7 @@ export interface Player {
   camp?: playerCamp
   prepared?: boolean;
   cards: string[];
+  lastplay?: string[];
   points: string[];
   actionState?:number
 }
@@ -45,6 +46,18 @@ export interface ILobbyRoom {
   playernumber: number;
 }
 
+export interface Kitty {
+  cards: string[],
+  multiplier: number,
+  point?: number
+}
+export interface Checkout {
+  winningParty: string,
+  winnerIndex: number[],
+  advancement: number,
+  totalPoint: number
+}
+
 export interface IRoom {
   id?: RoomID;
   name: string;
@@ -53,8 +66,10 @@ export interface IRoom {
   dealerIndex?:number
   initiatorIndex?:number
   trump:Trump
-  kitty?:string[]
+  kitty?:Kitty
   tickets?:Ticket[]
+  cardLeft?:number
+  checkout?:Checkout
 }
 
 export interface ServerEvents {
@@ -70,6 +85,7 @@ export interface ServerEvents {
   "room:event": (actionState: actionStates) => void;
   "player:kitty": (cards: string[]) => void;
   "player:play": () => void;
+  "room:dumpfailed": (cards:string[], returns:string[]) => void;
 }
   export interface ClientEvents {
     "lobby:list": () => void;
@@ -85,5 +101,5 @@ export interface ServerEvents {
     "room:call": (roomid: RoomID,playerid: PlayerID, trump:Trump) =>void
     "room:kitty": (roomid: RoomID,playerid: PlayerID, cards: string[]) =>void
     "room:ticket": (roomid: RoomID,playerid: PlayerID, tickets: any) =>void
-    "room:play": (roomid: RoomID,playerid: PlayerID, cards: string[]) =>void
+    "room:play": (roomid: RoomID,playerid: PlayerID, cards: string[], callback: (fallback? : string[])=> void) =>void
   }

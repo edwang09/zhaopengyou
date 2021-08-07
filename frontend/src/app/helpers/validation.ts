@@ -7,6 +7,7 @@ import { Judge } from "./judge";
 export const canPlay = (hand: string[], picked: number[], roomData: IRoom, isInitiator:boolean): any => {
   const judge = new Judge(roomData.trump, roomData.tickets)
   const pickedCard = picked.map((p) => hand[p]);
+  console.log("picked card", pickedCard)
   const decomposedCard = judge.decompose(pickedCard);
   if (isInitiator) {
     console.log("playing card as intiator",{

@@ -12,7 +12,13 @@ export class InMemoryHandRepository {
       return Promise.reject(Errors.ENTITY_NOT_FOUND);
     }
   }
-
+  getByIdSync(id: PlayerID): string[] {
+    if (this.hands.has(id)) {
+      return this.hands.get(id)
+    } else {
+      return [""]
+    }
+  }
   add(id: PlayerID, cards: string[]): Promise<void> {
     if (this.hands.has(id)) {
       const current = this.hands.get(id);
@@ -22,15 +28,15 @@ export class InMemoryHandRepository {
       return Promise.reject(Errors.ENTITY_NOT_FOUND);
     }
   }
-  remove(id: PlayerID, cards: string[]): Promise<void> {
+  remove(id: PlayerID, cards: string[]): Promise<string[]> {
     const current = this.hands.get(id);
-    if (current) {
+    if (current && cards.length > 0) {
       cards.forEach((c) => {
         const index = current.indexOf(c);
         current.splice(index,1);
       });
       this.hands.set(id, current);
-      return Promise.resolve();
+      return Promise.resolve(current);
     } else {
       return Promise.reject(Errors.ENTITY_NOT_FOUND);
     }

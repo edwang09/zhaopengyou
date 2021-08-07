@@ -8,7 +8,7 @@ import { Register } from "./register";
 import { GameRoom } from "./gameroom";
 import { Response, IRoom, ILobbyRoom, ClientEvents, ServerEvents, RoomID, Trump, Ticket, Player } from "./interfaces/ISocket";
 import { actionStates } from "./enums/enums";
-const SERVER_URL = "ws://localhost:3000";
+const SERVER_URL = "ws://192.168.86.26:3000";
 
 export class GameApp extends PIXI.Application{
   //util
@@ -22,12 +22,13 @@ export class GameApp extends PIXI.Application{
   lobby: Lobby;
   background: Background;
   register: Register;
-  cb: () => void;
 
-  constructor(parent: HTMLElement, width: number, height: number, cb:() => void = null) {
+  constructor(parent: HTMLElement, width: number, height: number) {
     super({width, height, forceCanvas:true});
-    this.cb = cb
     document.body.appendChild(this.view);
+    this.view.style.position = "absolute"
+    this.view.style.top = "0"
+    this.view.style.left = "0"
     // if(parent.lastElementChild) parent.replaceChild(this.view, parent.lastElementChild); // Hack for parcel HMR
 
     const loader: Loader = new Loader();
@@ -43,7 +44,6 @@ export class GameApp extends PIXI.Application{
     this.handleSocket();
     this.background = new Background(this);
     this.lobby = new Lobby(this);
-    this.cb()
   }
   handleEvents(): void {
     this.eventHandler
@@ -95,7 +95,9 @@ export class GameApp extends PIXI.Application{
       })
       .on("room:play", (cards:string[])=>{
         console.log("room:play")
-        this.socket.emit("room:play", this.roomId,this.userData.id, cards)
+        this.socket.emit("room:play", this.roomId,this.userData.id, cards,(fallback:string[])=>{
+          this.gameroom.dealHands(fallback, false)
+        })
       })
   }
   handleSocket(): void {
@@ -118,21 +120,25 @@ export class GameApp extends PIXI.Application{
       this.lobby.updateRoom(room);
     });
     this.socket.on("room:player:updated", (room: IRoom) => {
-      console.log("room:player:updated : " + room.players)
+      console.log("room:player:updated : ", room)
       this.gameroom.updatePlayers(room);
       this.gameroom.switchState(room)
 
     });
     this.socket.on("room:card:updated", (room: IRoom) => {
-      console.log("room:card:updated : " + room.players)
+      console.log("room:card:updated : ", room)
       this.gameroom.updatePlayerCards(room);
-      this.gameroom.switchState(room)
+      this.gameroom.updatePlayers(room);
+      this.gameroom.switchState(room);
+      if(room.cardLeft === 0){
+        console.log("game end", room)
+        this.gameroom.toggleBuryBoard(true, room.kitty, room.checkout)
+      }
     });
     this.socket.on("room:event", (actionState: actionStates) => {
       this.handleActionState(actionState)
     });
     this.socket.on("player:deal", (cards: string[]) => {
-      console.log("player:deal : ",cards)
       this.gameroom.dealHands(cards)
     });
     
@@ -153,6 +159,10 @@ export class GameApp extends PIXI.Application{
     });
     this.socket.on("player:play", () => {
       this.gameroom.action.switchState(actionStates.PLAY);
+    });
+    this.socket.on("room:dumpfailed", (cards, played) => {
+      console.log("room:dumpfailed",cards, played)
+      this.gameroom.showDumpfailed(cards, played);
     });
   }
   handleActionState(actionState: actionStates) {
@@ -183,7 +193,6 @@ export class GameApp extends PIXI.Application{
   }
   arrangeRoom(roomData: IRoom): void {
     this.lobby.hide();
-    console.log("lobby")
     if (this.gameroom === undefined){
       this.gameroom = new GameRoom(this, roomData);
     }
@@ -192,6 +201,9 @@ export class GameApp extends PIXI.Application{
     this.gameroom.updateTrump(roomData)
     this.gameroom.updatePlayerCards(roomData)
     this.gameroom.switchState(roomData)
+    if(roomData.cardLeft === 0){
+      this.gameroom.toggleBuryBoard(true, roomData.kitty, roomData.checkout)
+    }
   }
   distroyRoom() {
     this.lobby.show();
@@ -210,7 +222,7 @@ export class GameApp extends PIXI.Application{
       window.sessionStorage.setItem("roomId", res.data.room.id);
       console.log(`room joined`);
       this.arrangeRoom(res.data.room);
-      this.gameroom.dealHands(res.data.hand || [])
+      this.gameroom.dealHands(res.data.hand || [],false)
     }
   }
 }

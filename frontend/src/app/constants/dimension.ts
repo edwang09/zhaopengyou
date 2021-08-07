@@ -36,7 +36,7 @@ export const OPTIONS = {
     Y: 0,
     OFFSET_X: 30,
     OFFSET_Y: 10,
-    GAP: 35
+    GAP: 40
 }
 export const ACTIONS = {
     X : 342,

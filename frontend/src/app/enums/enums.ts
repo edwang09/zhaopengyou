@@ -11,14 +11,15 @@ export enum actionButtons {
 export enum handTypes {
     USER_HAND,
     PLAYER_CARD,
-    USER_CALL
+    USER_CALL,
+    SHOW_DOWN
 }
 export enum actionStates {
-  PREPARE,
-  KITTY,
-  PLAY,
-  CALL,
-  CLEAR
+    PREPARE,
+    KITTY,
+    PLAY,
+    CALL,
+    CLEAR
 }
 export enum playerCamp {
     DEALER,

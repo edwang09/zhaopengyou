@@ -1,8 +1,12 @@
 import { globalAgent } from "http";
-import { Player, Ticket, Trump } from "../room/room.schema";
+import { IRoom, Kitty, Player, Ticket, Trump } from "../room/room.schema";
 const cards = ["02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14"];
 
 export class Judge {
+
+
+
+ 
   trump: Trump;
   tickets: Ticket[];
   reference: Record<string, string[]>;
@@ -18,7 +22,33 @@ export class Judge {
     };
     if (trump.suit) this.reference[trump.suit] = [...cards.filter((c) => c !== trump.number).map((c) => trump.suit + c), ...adder];
   }
-  
+
+  getKittyMultiplier(playCard: string[]):number {
+    const decompose = this.decompose(playCard)[0]
+    const factor = decompose.height+decompose.width-1
+    return 2 ** factor;
+  }
+  advanceLevel(level: string, advancement: number): string {
+    console.log("advancement", level, advancement, cards[cards.indexOf(level)+advancement])
+    return cards[cards.indexOf(level)+advancement]
+  }
+  getAdvancement(points: string[], kitty: Kitty) :[number, number]{
+    const totalPoint = kitty.multiplier * kitty.point + points.reduce((acc,cur)=>{
+      return acc+this.getPoint(cur)
+    },0)
+    
+    if (totalPoint === 0) {
+      return [totalPoint, -4]
+    } else if(totalPoint < 40) {
+      return [totalPoint, -3];
+    } else if(totalPoint < 80) {
+      return [totalPoint, -2];
+    } else if(totalPoint < 160) {
+      return [totalPoint, -1];
+    }else {
+      return [totalPoint, Math.ceil((totalPoint-160)/80)]
+    }
+  }
   getPoint(card: string): number {
     switch (card.slice(1)) {
       case "05":
@@ -52,6 +82,7 @@ export class Judge {
     if (attack.length !== defence.length) return [false, 0];
     const decomposeAttack = this.decompose(attack);
     const decomposeDefence = this.decompose(defence);
+    console.log("Can beat",decomposeDefence,decomposeAttack,  decomposeAttack.length === 1 && this.compare(decomposeAttack[0].card, decomposeDefence[0].card) )
     if (decomposeAttack.length === 0) return [false, 0];
     // defend is not dump, must win by card
     if (decomposeDefence.length === 1){
@@ -78,23 +109,55 @@ export class Judge {
     }
   }
   // check if the cards can dump
-  canDump(cards: string[], hands: string[][]): [boolean, string[]] {
+  canDump(cards: string[], hands: string[][]): [boolean, string[], string[]] {
+    hands = hands.map(ph=>{
+      return ph.filter(c=>this.getSuit(c) ===this.getSuit(cards[0]))
+    })
     const decomposedDump = this.decompose(cards).reverse();
+    // not a dump
+    if(decomposedDump.length <= 1) return [true, cards, []];
+    let beat:{height:number, width:number, card:string}[] = []
     const canDump = hands.every((h) => {
-      decomposedDump.every((g) => {
+      return decomposedDump.every((g) => {
+        const hasBeat = this.hasBeatOverGroup(g, h)
+        if (hasBeat){
+          console.log("has beat",g)
+          beat.push(g)
+        }
         return !this.hasBeatOverGroup(g, h);
       });
     });
-    if (canDump) return [true, []];
-    return [false, this.composeFromGroup(decomposedDump[0])];
+    // console.log("candump", cards, hands, canDump, beat)
+    if (canDump) return [true, cards, []];
+    const fallback = this.composeFromGroup(beat.sort((a,b)=>{
+      if (a.height === b.height){
+        if (a.width === b.width){
+          return (a.card > b.card)?1:-1
+        }else{
+          return a.width - b.width;
+        }
+      }else{
+        return a.height - b.height;
+      }
+    })[0])
+    const returns = Object.assign([],cards)
+    fallback.forEach((c) => {
+      const index = returns.indexOf(c);
+      returns.splice(index,1);
+    });
+    // console.log("candump", [false, fallback, cards])
+    return [false, fallback, returns];
   }
+  
   // check if the cards has a beat over a group
   hasBeatOverGroup(group: { card: string; width: number; height: number }, cards: string[]) {
     const summarizedCards = this.summarizeCard(cards);
     const orderOfOverCard = Object.keys(summarizedCards)
       .filter((c) => this.compare(c, group.card) && summarizedCards[c] >= group.width)
       .map((c) => this.getOrder(c));
-    return this.hasConsequtiveNumber(orderOfOverCard, group.height);
+    const hasBeat = this.hasConsequtiveNumber(orderOfOverCard, group.height);
+    // console.log("hasBeat", group, cards, hasBeat)
+    return hasBeat
   }
 
   // check if a list of number has a consecutive numbers of length (height)
@@ -147,12 +210,16 @@ export class Judge {
     let cards = [];
     const suit = this.getSuit(group.card);
     for (let index = 0; index < group.height; index++) {
-      cards.push(this.getCardFromOrder(this.getOrder(group.card) + index, suit));
-    }
-    for (let index = 0; index < group.width; index++) {
-      cards = [...cards, ...cards];
+      cards = [...cards, ...this.repeatStringtoArray(this.getCardFromOrder(this.getOrder(group.card) + index, suit), group.width)];
     }
     return cards;
+  }
+  repeatStringtoArray(arr: string, n:number):string[]{
+    let res = []
+    for (let index = 0; index < n; index++) {
+      res = [...res, arr]
+    }
+    return res;
   }
 
   //decompose cards into groups
@@ -168,7 +235,7 @@ export class Judge {
       if (acc[summarizedCard[curr]]) return { ...acc, [summarizedCard[curr]]: [...acc[summarizedCard[curr]], this.getOrder(curr)].sort() };
       return { ...acc, [summarizedCard[curr]]: [this.getOrder(curr)] };
     }, {});
-
+    console.log(groupByCount)
     // reduce to Tolaji if any
     return Object.keys(groupByCount)
       .sort()
@@ -183,14 +250,16 @@ export class Judge {
             }),
           ];
         } else {
-          const sequenceList = groupByCount[count];
+          const sequenceList = groupByCount[count].sort((a,b)=>a-b);
           let height = 1;
           let card = this.getCardFromOrder(sequenceList[0], suit);
+          console.log(sequenceList)
           for (let index = 1; index < sequenceList.length; index++) {
+            console.log(sequenceList[index] - sequenceList[index - 1])
             if (sequenceList[index] - sequenceList[index - 1] === 1) {
               height++;
             } else if (sequenceList[index] - sequenceList[index - 1] === 0) {
-              total = [...total, { width, height: 1, card }];
+              total = [...total, { width, height: 1, card:this.getCardFromOrder(sequenceList[index], suit) }];
             } else {
               total = [...total, { width, height, card }];
               height = 1;
@@ -199,6 +268,7 @@ export class Judge {
           }
           total = [...total, { width, height, card }];
         }
+        console.log(total)
         return total;
       }, []);
   }
@@ -278,20 +348,21 @@ export class Judge {
     return[ winnerIndex, points];
   }
   noTicketRemains(){
-    return this.tickets.every(t=> t.seen && t.seen >= t.sequence)
+    return this.tickets.every(t=> t.seen && t.seen > t.sequence)
   }
   resolveTicket(cards: string[]):[onBoard: boolean, tickets: Ticket[]]{
     if(this.noTicketRemains()) return [false, this.tickets]
     let onBoard = false;
-    cards.map(c=>{
+    cards.forEach(c=>{
       this.tickets = this.tickets.map(t=>{
         if (t.card === c) {
-          onBoard = true
+          if (t.sequence === t.seen) onBoard = true
           return {...t, seen: t.seen+1}
         }
         return t
       })
     })
+    console.log("resolve Tickets", cards, this.tickets, onBoard)
     return [onBoard, this.tickets]
   }
 }

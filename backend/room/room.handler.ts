@@ -4,9 +4,10 @@ import { actionStates, ClientEvents, Response, ServerEvents } from "../events";
 import { Server, Socket } from "socket.io";
 import { v4 as uuid } from "uuid";
 import { idSchema, IRoom, RoomID, Player, PlayerID, MAX_PLAYER, ILobbyRoom, Ticket, Trump, playerCamp } from "./room.schema";
-import { StripeRoom } from "./room.repository";
+import { InMemoryRoomRepository, StripeRoom } from "./room.repository";
 import { resolvePlay, newDeck } from "../helpers/helper";
 import { InMemoryHandRepository } from "./hand.repository";
+import { Console } from "console";
 
 export function registerRoomHandlers(
   io: Server<ClientEvents, ServerEvents>,
@@ -42,6 +43,7 @@ export function registerRoomHandlers(
       socketid: socket.id,
       level:newRoom.startLevel,
       actionState : actionStates.PREPARE,
+      camp:playerCamp.UNKNOWN,
       points:[],
       cards:[]
     }, null, null, null, null, null
@@ -74,30 +76,31 @@ export function registerRoomHandlers(
       });
     }
     try {
-      console.log(roomid)
       const room: IRoom = await roomRepository.findById(roomid);
-      console.log(room)
+      // console.log(room)
       //rejoin
       if (room.players.some((p) => p && p.id === player.id)) {
         const hand: string[] = await handRepository.getById(player.id);
-        console.log("player rejoining...")
         room.players = room.players.map((p) => {
-          if (p && p.id === player.id) return { ...player, socketid: socket.id };
+          if (p && p.id === player.id) return { ...p, socketid: socket.id };
           return p;
         });
+        io.to(roomid).emit("room:player:updated", room);
+        socket.join(roomid);
+        socket.leave("lobby");
+        io.to("lobby").emit("lobby:updated", StripeRoom(room));
         callback({ data: { room, hand } });
         // first time joining
       } else if (room.players.filter((p) => p).length < MAX_PLAYER) {
         let firstNull = true;
-        console.log(room.players);
+        // console.log(room.players);
         room.players = room.players.map((p) => {
           if (firstNull && p === null) {
             firstNull = false;
-            return { ...player, socketid: socket.id, actionState: actionStates.PREPARE, level: room.startLevel, cards:[], points:[] };
+            return { ...player, socketid: socket.id, actionState: actionStates.PREPARE, camp:playerCamp.UNKNOWN ,level: room.startLevel, cards:[], points:[] };
           }
           return p;
         });
-        console.log(room.players);
         io.to(roomid).emit("room:player:updated", room);
         socket.join(roomid);
         socket.leave("lobby");
@@ -133,7 +136,6 @@ export function registerRoomHandlers(
     }
   });
   socket.on("room:prepare", async function (roomid: RoomID, playerid: PlayerID, prepare: boolean) {
-    console.log("room:prepare");
     const room: IRoom = await roomRepository.findById(roomid);
     room.players = room.players.map((p) => {
       if (p && p.id === playerid) {
@@ -145,14 +147,16 @@ export function registerRoomHandlers(
     try {
       io.to(room.id).emit("room:player:updated", room);
       if (room.players.filter((p) => p && p.prepared).length == MAX_PLAYER){ 
+        delete room.checkout
         room.players = room.players.map((p) => {
           if (p) {
             return { ...p, actionState: actionStates.CALL };
           }
           return p;
         });
+        await roomRepository.save(room)
         io.to(room.id).emit("room:player:updated", room);
-        startGame(io, socket, room, handRepository);
+        startGame(io, socket, room, handRepository, roomRepository);
       }
     } catch (error) {
       console.error({
@@ -161,7 +165,6 @@ export function registerRoomHandlers(
     }
   });
   socket.on("room:call", async function (roomid: RoomID, playerid: PlayerID, trump: Trump) {
-    console.log("room:call");
     const room: IRoom = await roomRepository.findById(roomid);
     if (validateCall(trump, room.trump)) {
       room.trump = trump;
@@ -175,44 +178,65 @@ export function registerRoomHandlers(
     }
   });
   socket.on("room:kitty", async function (roomid: RoomID, playerid: PlayerID, cards: string[]) {
-    console.log("room:kitty");
     const room: IRoom = await roomRepository.findById(roomid);
-    room.kitty = cards;
+    room.kitty = {cards, multiplier:0, point:0};
     try {
-      await handRepository.remove(playerid, cards);
+      const newhand = await handRepository.remove(playerid, cards);
+      console.log("kitty: player", playerid, newhand)
     } catch (error) {
       console.error(error);
     }
   });
   socket.on("room:ticket", async function (roomid: RoomID, playerid: PlayerID, tickets: Ticket[]) {
-    console.log("room:ticket");
     const room: IRoom = await roomRepository.findById(roomid);
     room.tickets = tickets;
     const playerIndex = room.players.findIndex((p) => p && p.id === playerid);
     try {
       room.players[playerIndex].camp = playerCamp.DEALER;
+      room.cardLeft = 35;
       room.players = room.players.map((p) => {
         return { ...p, actionState: actionStates.CLEAR, cards:[] };
       });
       room.players[playerIndex].actionState = actionStates.PLAY;
+      await roomRepository.save(room)
       io.to(room.id).emit("room:ticket:updated", room);
       io.to(room.id).emit("room:player:updated", room);
     } catch (error) {
       console.error(error);
     }
   });
-  socket.on("room:play", async function (roomid: RoomID, playerid: PlayerID, cards: string[]) {
-    console.log("room:play");
+  socket.on("room:play", async function (roomid: RoomID, playerid: PlayerID, cards: string[], callback: (fallback? : string[])=> void) {
     const room: IRoom = await roomRepository.findById(roomid);
-    const [nextIndex, newRoom] = resolvePlay(room,playerid,cards)
-    await roomRepository.save(newRoom)
     try {
-      await handRepository.remove(playerid, cards);
-      io.to(room.id).emit("room:card:updated", room);
-      // TODO: this may be no use
-      if (room.players[nextIndex].socketid) {
-        io.to(room.players[nextIndex].socketid).emit("player:play");
+      const hands = room.players.filter(p=>p.id !== playerid).map(p=>{
+        // console.log("play: player", handRepository.getByIdSync(p.id))
+        return Object.assign([],handRepository.getByIdSync(p.id))
+      })
+      const playCards = Object.assign([], cards)
+      const [newRoom, returns] = resolvePlay(room,playerid,cards, hands)
+      await roomRepository.save(newRoom)
+      // dump failed
+      if (returns.length>0) {
+        callback(returns)
+        io.to(room.id).emit("room:dumpfailed", cards, room.players.filter(p=>p&&p.id === playerid)[0].cards);
       }
+      io.to(room.id).emit("room:card:updated", room);
+        
+      if(playCards.length !== cards.length){
+        console.error("cards lost !!!")
+      }
+      try {
+        const newhand = await handRepository.remove(playerid, playCards);
+        await handRepository.add(playerid, returns);
+        console.log("play: player", playerid, newhand.length)
+      } catch (error) {
+        console.error("hand removal failed")
+      }
+
+      // TODO: this may be no use
+      // if (room.players[nextIndex].socketid) {
+      //   io.to(room.players[nextIndex].socketid).emit("player:play");
+      // }
     } catch (error) {
       console.error(error);
     }
@@ -220,11 +244,11 @@ export function registerRoomHandlers(
   // socket.on("lobby:update", updateRoom);
   // socket.on("lobby:delete", deleteRoom);
 }
-function startGame(io: Server, socket: Socket, room: IRoom, handRepository: InMemoryHandRepository) {
+function startGame(io: Server, socket: Socket, room: IRoom, handRepository: InMemoryHandRepository,roomRepository:InMemoryRoomRepository) {
   io.to(room.id).emit("room:event", actionStates.CALL);
-  dealCard(io, socket, room, handRepository);
+  dealCard(io, socket, room, handRepository,roomRepository);
 }
-function dealCard(io: Server, socket: Socket, room: IRoom, handRepository: InMemoryHandRepository) {
+function dealCard(io: Server, socket: Socket, room: IRoom, handRepository: InMemoryHandRepository,roomRepository:InMemoryRoomRepository) {
   const deck = newDeck();
   room.players.forEach((p) => {
     handRepository.init((p as Player).id);
@@ -244,12 +268,12 @@ function dealCard(io: Server, socket: Socket, room: IRoom, handRepository: InMem
     } else {
       clearInterval(dealCardInterval);
       setTimeout(async () => {
-        await buryCard(io, socket, room, handRepository, deck);
+        await buryCard(io, socket, room, handRepository,roomRepository, deck);
       }, 1000);
     }
   }, 30);
 }
-async function buryCard(io: Server, socket: Socket, room: IRoom, handRepository: InMemoryHandRepository, deck: string[]) {
+async function buryCard(io: Server, socket: Socket, room: IRoom, handRepository: InMemoryHandRepository,roomRepository:InMemoryRoomRepository, deck: string[]) {
   if (!room.dealerIndex && room.trump.callerId){ 
     room.dealerIndex = room.players.findIndex((p) => p && p.id === room.trump.callerId);
   }
@@ -263,6 +287,7 @@ async function buryCard(io: Server, socket: Socket, room: IRoom, handRepository:
       }
       return p;
     });
+    await roomRepository.save(room)
     io.to(room.id).emit("room:player:updated", room);
     io.to((room.players[room.dealerIndex as number] as Player).socketid).emit("player:kitty", deck);
     await handRepository.add((room.players[room.dealerIndex as number] as Player).id, deck);

@@ -31,6 +31,7 @@ export interface ServerEvents {
   "player:deal": (cards: string[]) => void;
   "player:kitty": (cards: string[]) => void;
   "player:play": () => void;
+  "room:dumpfailed": (cards:string[], returns:string[]) => void;
 }
 export interface ClientEvents {
   "lobby:join": (roomid: RoomID,player: Player, callback: (res?: Response<{room: IRoom, hand?: string[]}>) => void) => void;
@@ -44,5 +45,5 @@ export interface ClientEvents {
   "room:call": (roomid: RoomID,playerid: PlayerID, trump:Trump) =>void
   "room:kitty": (roomid: RoomID,playerid: PlayerID, cards: string[]) =>void
   "room:ticket": (roomid: RoomID,playerid: PlayerID, tickets: Ticket[]) =>void
-  "room:play": (roomid: RoomID,playerid: PlayerID, cards: string[]) =>void
+  "room:play": (roomid: RoomID,playerid: PlayerID, cards: string[], callback: (fallback? : string[])=> void) =>void
 }

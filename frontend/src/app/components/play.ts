@@ -36,6 +36,12 @@ export class Play extends PIXI.Container {
           cb();
         });
         break;
+        
+      case handTypes.SHOW_DOWN:
+        this.gap = CARD.NORMAL_GAP;
+        this.cardSize = "small";
+        this.cardY = 0;
+        break;
     }
     this.gravity = gravity;
     this.renderCards(cards);

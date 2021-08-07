@@ -23,14 +23,14 @@ ipconfig:
 
 	
 pull:
-	make ssh-cmd COMMENT="ip config" CMD='docker pull $(FRONTEND_TAG) && docker pull $(BACKEND_TAG) ' 
+	make ssh-cmd COMMENT="docker pull" CMD='docker pull $(FRONTEND_TAG) && docker pull $(BACKEND_TAG) ' 
 clean:
-	make ssh-cmd COMMENT="ip config" CMD='docker container stop $(FRONTEND_CONTAINER) && docker container rm $(FRONTEND_CONTAINER) && docker container stop $(BACKEND_CONTAINER) && docker container rm $(BACKEND_CONTAINER) ' 
+	make ssh-cmd COMMENT="docker cleanup" CMD='docker container stop $(FRONTEND_CONTAINER) && docker container rm $(FRONTEND_CONTAINER) && docker container stop $(BACKEND_CONTAINER) && docker container rm $(BACKEND_CONTAINER) ' 
 
 network:
-	make ssh-cmd COMMENT="ip config" CMD='docker network create zpy' 
+	make ssh-cmd COMMENT="docker network" CMD='docker network create zpy' 
 run:
-	make ssh-cmd COMMENT="ip config" CMD='docker run -d --network zpy --network-alias backend --name=$(BACKEND_CONTAINER) $(BACKEND_TAG) && docker run -d --network zpy --network-alias frontend --name=$(FRONTEND_CONTAINER) -p 80:80 $(FRONTEND_TAG)' 
+	make ssh-cmd COMMENT="docker run" CMD='docker run -d --network zpy --network-alias backend --name=$(BACKEND_CONTAINER) $(BACKEND_TAG) && docker run -d --network zpy --network-alias frontend --name=$(FRONTEND_CONTAINER) -p 80:80 $(FRONTEND_TAG)' 
 
 dev:
 	docker-compose up
@@ -40,3 +40,13 @@ build:
 	docker-compose build --build-arg ENV=prod
 push:
 	docker-compose push
+
+local-pull:
+	docker pull $(FRONTEND_TAG) && docker pull $(BACKEND_TAG)
+local-clean:
+	docker container stop $(FRONTEND_CONTAINER) && docker container rm $(FRONTEND_CONTAINER) && docker container stop $(BACKEND_CONTAINER) && docker container rm $(BACKEND_CONTAINER) 
+
+local-network:
+	docker network create zpy
+local-run:
+	docker run -d --network zpy --network-alias backend --name=$(BACKEND_CONTAINER) $(BACKEND_TAG) && docker run -d --network zpy --network-alias frontend --name=$(FRONTEND_CONTAINER) -p 80:80 $(FRONTEND_TAG)

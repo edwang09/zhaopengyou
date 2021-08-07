@@ -3,8 +3,97 @@
   <head>
     <meta charset="utf-8" />
     <title>6人升级</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
   </head>
   <body>
-    <script src="main.js"></script>
+    <div id = "header">
+      <h1 id="title" >6人升级 (Shengji - 6 player)</h1>
+      <button id = "entry">start game</button>
+
+    </div>
+    <div id="content">
+      <h2>Rules</h2>
+      <h3>Objective</h3>
+      <p>6 player ShengJi is a variation of traditional 4 player Shengji. Each round 6 players are divided into two parties, House versus Player. Each player on the Player side try to earn as much points as possible while each player on the House side try to hinder opponents from earning points. Normally 6 players are divided into 3 vs 3 however in certain circumstance, 2 vs 4 or 1 vs 5 may occur. The House side will have one player as Dealer, who will setup the Kitty and announce Tickets (explains later)</p>
+      <p>Upon completion of each game, either House team or Player team will advance their level depending on the points Player team earned during the game. Each player counts their level individually (since team varies game to game). Each player starts with level 2, end with Ace. The Trump rank of each game is determined by the Dealer’s level.</p>
+      <h3>Set up</h3>
+      <p>Card decks consist of 4 set of pokers including both joker cards totaling 216 cards. At start of each game players take turns to draw cards until each having 35 cards in hands (or there are 6 cards left on the deck). Then the Dealer will take the remaining 6 cards and pick 6 cards from hand facing down on the table as Kitty. Then, the Dealer will need to announce two set of rules to find his/her two teammates. Each of the rules will be in the format of:</p>
+      <blockquote>The player who played nth A of B.</blockquote>
+      <p>For example:</p>
+      <blockquote>The player who played first Ace of Heart</blockquote>
+      <p>Later in game whenever a player meets the criteria, he/she will join the House team immediately. When both the tickets are met, the players who has not joined the House team will form the Player team.</p>
+      <h3>Calling for trump suit</h3>
+      <p>During drawing, any player can call for the trump suit of the game using the corresponding trump rank card determine by Dealer. For example, if Dealer is at level 3, during drawing card, any a player can show a 3 of spade to let the trump suit of this game to be spade. That trump suit will be shared for all players in this game.</p>
+      <p>Other player can more cards to override the previously called suit. For example, another player can use two 3 of hearts to override the previous call and make the trump suit of this game to be heart.</p>
+      <h3>Rank of cards:</h3>
+      <p>The rank of individual card start from is highest is:</p>
+      <blockquote>Red joker, black joker, trump suit rank card, other trump rank card, other trump suit cards from Ace, King, Queen, Jack, 10 to 2, non-trump suit cards from Ace, King, Queen, Jack, 10 to 2</blockquote>
+      <p>For example, if Dealer level is 4, trump suit is Spade, the rank of cards becomes:</p>
+      <blockquote>Red joker, black joker, 4 of spade, (4 of heart, 4 of club, 4 of diamond), ace of spade, king of spade, … 5 of spade, 3 of spade, 2 of spade, ace of non-spade, king of non-spade, … 5 of non-spade, 3 of non-spade, 2 of non-spade</blockquote>
+      <p>Cards from Red joker to trump suit card are all considered trump suit whereas other cards remain their original suit. For the above example, 4 of heart is of trump suit whereas 3 of heart is still a heart.</p>
+      <h3>Basic Rule</h3>
+      <p>A game consists of several rounds. In each round, each player plays same number of cards one player by one player counter-clock wisely starting from the winner of previous round. The first round starts from Dealer.</p>
+      <p>In each round, the first player (or Initiator) will play a set of cards, it can be either one card, several same cards, or a Tolaji (explained later). All other players play same number of cards one by one counter-clock wisely. After all player has played, winner will get the points, that is all the 5s, 10s and Kings, of all the played cards in this round, set aside near him. Each 5s count for 5 points and each 10 or kings counts for 10 points. The total point of Player team is the sum of all the points all the team members added up to.</p>
+      <p>Each player must follow rules for a valid play based on the cards played by first player:</p>
+      <ul>
+        <li>If first player plays certain suit, other players can only play that same suit unless he/she has none.</li>
+        <li>If first player plays n of a kind or Tolaji, other players must play n of a kind if he/she has any.</li>
+      </ul>
+      <h3>Determining winner for each round:</h3>
+      <h4>Single card:</h4>
+      <p>If first player plays single card, determine by its rank. If same rank, whoever plays first wins.  If first player plays a non-trump card, other non-trump cards with different suit may automatically disqualifies and may never win.</p>
+      <h4>N of a kind:</h4>
+      <p>Same as single card but non- N of a kind cards automatically disqualifies and may never win.</p>
+      <h4>Tolaji:</h4>
+      <p>Same as single card but one Tolaji with same format cards disqualifies.</p>
+    </div>
+    <script>
+      document.getElementById("entry").addEventListener("click", (target, event)=>{
+        window.open("/play.html", "MsgWindow", "width=1024,height=721, scrollbars=no")
+      })
+    </script>
+    <style>
+      body{
+        margin: 0;
+        padding: 0;
+      }
+      #header {
+        width:100%;
+        height: 400px;
+        position: relative;
+        padding: 50px;
+      }
+      #header::after {    
+        content: "";
+        background-image: url(background.png);
+        background-size: cover;
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        opacity: 0.65;
+      }
+      #title {
+        text-align: center;
+        z-index: 1;
+        margin: 50px auto;
+        position: relative;
+      }
+      #entry {
+        display: block;
+        text-align: center;
+        margin: 100px auto;
+        position: relative;
+        z-index: 1;
+      }
+      #content{
+        max-width: 1000px;
+        margin: auto;
+      }
+
+    </style>
   </body>
 </html>

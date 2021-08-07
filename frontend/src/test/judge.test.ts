@@ -56,7 +56,9 @@ describe('Fullfill as Follower Test', () => {
     const decomposedHands = [
         [{width: 2, height:3, card:"s03"}, {width: 3, height:1, card:"s09"}, {width: 1, height:1, card:"s14"} ],
     ]
+    const cards = [["s09", "s09", "s08", "s08"], ["s05", "s05", "s03", "s03"]]
     
+    const hands = [["s09", "s09","s09", "s08", "s08", "s05", "s05", "s03", "s03"]]
     const decomposedInitiators = [
         [{width: 2, height:2, card:"s07"}],
     ]
@@ -68,7 +70,12 @@ describe('Fullfill as Follower Test', () => {
     })
     test('Test if tolaji fullfill works', () => {
         for (let index = 0; index < decomposedCards.length; index++) {
-            expect(judge.checkTolajiFullfillmentAsFollower(decomposedCards[0], decomposedHands[0],decomposedInitiators[0])).toBe(true);
+            expect(judge.checkTolajiFullfillmentAsFollower(cards[0], hands[0], decomposedInitiators[0])).toBe(true);
+        }
+    })
+    test('Test if tolaji fullfill works', () => {
+        for (let index = 0; index < decomposedCards.length; index++) {
+            expect(judge.checkTolajiFullfillmentAsFollower(cards[1], hands[0], decomposedInitiators[0])).toBe(false);
         }
     })
 });

@@ -78,7 +78,7 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
     
     this.sequenceSelectorHandler[index] = ["First", "Second", "Third", "Fourth"].map((n,id)=>{
       const sequenceSelector: SelectableText = new SelectableText(n, defaultStyle,n, ()=>{
-        this.selectSequence(index, id + 1)
+        this.selectSequence(index, id)
       })
       adjustToCenterOfContainer(sequenceSelector, id*100 -250, index*160-150);
       sequenceSelector.anchor.set(0)
@@ -125,7 +125,7 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
     this.tickets[index].sequence = sequence
     this.labelHandler[index].text = `Ticket${index+1} : ${numberToOrder(this.tickets[index].sequence)} ${cardToName(this.tickets[index].suit, this.tickets[index].number)}`
     this.sequenceSelectorHandler[index].forEach((ssh,id)=>{
-      if (id === sequence-1) ssh.toggle(true)
+      if (id === sequence) ssh.toggle(true)
       else ssh.toggle(false)
     })
   }

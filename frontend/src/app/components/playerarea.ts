@@ -30,7 +30,7 @@ import { Player } from "../interfaces/ISocket";
         renderContainer(this, this.room, x,y)
     }
     displayHud(player:Player, side:number):void{
-        this.hud = new Hud(this, player, side * (PLAYER_AREA_DIMENSION.WIDTH-HUD_DIMENSION.WIDTH),0)
+        this.hud = new Hud(this.room, this, player, side * (PLAYER_AREA_DIMENSION.WIDTH-HUD_DIMENSION.WIDTH),0)
     }
     displayCards(side:number):void{
         this.playHandler = new Play(this,HUD_DIMENSION.WIDTH - side * HUD_DIMENSION.WIDTH, 0, [], handTypes.PLAYER_CARD, side);
