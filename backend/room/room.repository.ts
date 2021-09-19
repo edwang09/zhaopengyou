@@ -56,5 +56,5 @@ export class InMemoryRoomRepository {
   }
 }
 export function StripeRoom(room: IRoom): ILobbyRoom {
-  return { id: room.id, name: room.name, playernumber: room.players.filter((p) => p).length };
+  return { id: room.id, name: room.name, playernumber: room.players.filter((p) => p !== null).length };
 }

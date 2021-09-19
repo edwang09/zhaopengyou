@@ -52,6 +52,6 @@ describe("room repository tests", () => {
     });
   });
   test("should strip room", () => {
-    expect(StripeRoom(testRoom)).toEqual({ id: testRoom.id, name: testRoom.name, playernumber: testRoom.players.length });
+    expect(StripeRoom(testRoom)).toEqual({ id: testRoom.id, name: testRoom.name, playernumber: testRoom.players.filter((p) => p !== null).length });
   });
 });
