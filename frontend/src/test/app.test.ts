@@ -37,6 +37,7 @@ describe("app test", () => {
     //     app.arrangeRoom(roomTemplate)
     //     done();
     // });
+    done();
     
   });
 });
