@@ -115,12 +115,16 @@ export class GameApp extends PIXI.Application{
       this.lobby.appendRoom(room);
     });
     this.socket.on("lobby:list", (rooms: ILobbyRoom[]) => {
-      console.log("lobby:created");
-      this.lobby.listRoom(rooms);
+      console.log("lobby:list", rooms);
+      this.lobby.displayLobby(rooms);
     });
     this.socket.on("lobby:updated", (room: ILobbyRoom) => {
       console.log("lobby:updated");
       this.lobby.updateRoom(room);
+    });
+    this.socket.on("lobby:deleted", (roomid: RoomID) => {
+      console.log("lobby:deleted");
+      this.lobby.deleteRoom(roomid);
     });
     this.socket.on("room:player:updated", (room: IRoom) => {
       console.log("room:player:updated : ", room)
@@ -196,7 +200,7 @@ export class GameApp extends PIXI.Application{
   }
   arrangeRoom(roomData: IRoom): void {
     this.lobby.hide();
-    if (this.gameroom === undefined){
+    if (!this.gameroom){
       this.gameroom = new GameRoom(this, roomData);
     }
     this.gameroom.updateTicket(roomData)

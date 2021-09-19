@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@pixi/sound": "^4.0.6",
     "eventemitter3": "^4.0.7",
     "lodash": "^4.17.21",
     "pixi.js": "^5.3.10",

@@ -45,7 +45,12 @@ export class InMemoryRoomRepository {
   }
   async removePlayerBySocketId(roomid: RoomID, socketid: string): Promise<IRoom> {
     const room: IRoom = await this.findById(roomid);
-    room.players = room.players.filter((p) => p && p.socketid !== socketid);
+    room.players = room.players.map((p) =>{ 
+      if(p && p.socketid !== socketid){
+        return p;
+      }
+      return null;
+    });
     await this.save(room);
     return Promise.resolve(room);
   }

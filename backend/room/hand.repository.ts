@@ -9,7 +9,7 @@ export class InMemoryHandRepository {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return Promise.resolve(this.hands.get(id)!);
     } else {
-      return Promise.reject(Errors.ENTITY_NOT_FOUND);
+      return Promise.resolve([]);
     }
   }
   getByIdSync(id: PlayerID): string[] {

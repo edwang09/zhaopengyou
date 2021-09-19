@@ -26,10 +26,40 @@ export function registerRoomHandlers(
       socket.leave(roomid);
       if (roomid !== "lobby") {
         const room: IRoom = await roomRepository.removePlayerBySocketId(roomid, socket.id);
+        if (room.players.every(p=>!p)){
+          await roomRepository.deleteById(roomid)
+          io.to("lobby").emit("lobby:deleted", roomid);
+        }else{
+          io.to(roomid).emit("room:player:updated", room);
+          io.to("lobby").emit("lobby:updated", StripeRoom(room));
+        }
+      }
+    });
+  });
+  socket.on("lobby:leave", async function (roomid: RoomID, playerid: PlayerID) {
+    // const { error } = idSchema.validate(roomid);
+    // if (error) {
+    //   return console.error({
+    //     error: Errors.ENTITY_NOT_FOUND,
+    //   });
+    // }
+    try {
+      socket.leave(roomid);
+      const room: IRoom = await roomRepository.removePlayerById(roomid, playerid);
+      console.log(room)
+      if (room.players.every(p=>!p)){
+        await roomRepository.deleteById(roomid)
+        io.to("lobby").emit("lobby:deleted", roomid);
+      }else{
         io.to(roomid).emit("room:player:updated", room);
         io.to("lobby").emit("lobby:updated", StripeRoom(room));
       }
-    });
+      socket.join("lobby");
+      const roomList: ILobbyRoom[]  = await roomRepository.listLobby()
+      socket.emit("lobby:list", roomList);
+    } catch (e) {
+      console.error(e);
+    }
   });
   socket.on("lobby:create", async function (newRoom: {name:string, startLevel:string}, player:Player, callback: (res: Response<IRoom>) => void) {
     // validate the payload
@@ -48,7 +78,6 @@ export function registerRoomHandlers(
       cards:[]
     }, null, null, null, null, null
     ]
-
     // persist the entity
     try {
       await roomRepository.save(room);
@@ -60,7 +89,6 @@ export function registerRoomHandlers(
         error: sanitizeErrorMessage(e),
       });
     }
-
     // acknowledge the creation
     callback({
       data: room,
@@ -68,16 +96,17 @@ export function registerRoomHandlers(
   });
 
   socket.on("lobby:join", async function (roomid: RoomID, player: Player, callback: (res: Response<{ room: IRoom; hand?: string[] }>) => void) {
-    const { error } = idSchema.validate(roomid);
-    if (error) {
-      console.error(error)
-      return callback({
-        error: Errors.ENTITY_NOT_FOUND,
-      });
-    }
+    // const { error } = idSchema.validate(roomid);
+    // if (error) {
+    //   console.error(error)
+    //   return callback({
+    //     error: Errors.ENTITY_NOT_FOUND,
+    //   });
+    // }
     try {
+      console.log(roomid)
       const room: IRoom = await roomRepository.findById(roomid);
-      // console.log(room)
+      console.log(room)
       //rejoin
       if (room.players.some((p) => p && p.id === player.id)) {
         const hand: string[] = await handRepository.getById(player.id);
@@ -116,25 +145,7 @@ export function registerRoomHandlers(
     }
   });
 
-  socket.on("lobby:leave", async function (roomid: RoomID, playerid: PlayerID) {
-    const { error } = idSchema.validate(roomid);
-    if (error) {
-      return console.error({
-        error: Errors.ENTITY_NOT_FOUND,
-      });
-    }
 
-    try {
-      socket.leave(roomid);
-      const room: IRoom = await roomRepository.removePlayerById(roomid, playerid);
-      io.to(roomid).emit("room:player:updated", room);
-      socket.join("lobby");
-      socket.leave(roomid);
-      io.to("lobby").emit("lobby:updated", StripeRoom(room));
-    } catch (e) {
-      console.error(e);
-    }
-  });
   socket.on("room:prepare", async function (roomid: RoomID, playerid: PlayerID, prepare: boolean) {
     const room: IRoom = await roomRepository.findById(roomid);
     room.players = room.players.map((p) => {

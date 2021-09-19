@@ -7,21 +7,26 @@ import { subtitle, white } from "./textstyle";
 import { IRoom, ILobbyRoom } from "./interfaces/ISocket";
 import { GameApp } from "./app";
 import { ImageButton } from "./components/imageButton";
+import { LobbyRoom } from "./components/lobbyRoom";
 export class Lobby extends PIXI.Container {
+
   app: GameApp;
   background: PIXI.Sprite;
   input: TextInput;
   pageNumber: number;
-  roomList: ILobbyRoom[];
+  roomListData: ILobbyRoom[];
   callback;
   pageTag: PIXI.Sprite;
   arrowleft: ImageButton;
   arrowright: ImageButton;
   logout: Button;
+  roomList: LobbyRoom[];
+  pageTagNumber: PIXI.Text;
   constructor(app: GameApp) {
     super();
     this.app = app;
-    this.pageNumber = 1;
+    this.pageNumber = 0;
+    this.roomListData = [];
     this.roomList = [];
     this.visible = false;
     this.interactive = true;
@@ -53,35 +58,50 @@ export class Lobby extends PIXI.Container {
   }
   displayNavigator(): void {
     this.pageTag = PIXI.Sprite.from(PIXI.Loader.shared.resources["tag"].texture);
-    addText(this.pageTag, `${this.pageNumber}`, white);
+    this.pageTagNumber = addText(this.pageTag, `${this.pageNumber + 1}`, white);
     const arrowsheet: PIXI.Spritesheet = PIXI.Loader.shared.resources["arrow"].spritesheet;
-    this.arrowleft = new ImageButton(arrowsheet.textures["left.png"], () => {
-      console.log("left");
+    this.arrowleft = new ImageButton(arrowsheet.textures["left.png"],  () => {
+      this.previousPage();
     });
     this.arrowright = new ImageButton(arrowsheet.textures["right.png"], () => {
-      console.log("right");
+      this.nextPage();
     });
+    this.updateNavigator();
     renderSprite(this.pageTag, this, -150, 200);
     renderSprite(this.arrowleft, this, -300, 200);
     renderSprite(this.arrowright, this, 0, 200);
   }
-
-  listRooms(roomList: ILobbyRoom[]): void {
-    roomList.forEach((rm, id) => {
-      this.displayRoom(rm, id);
-    });
+  updateNavigator(){
+    if(this.roomListData.length > 0 && Math.ceil(this.roomListData.length/3) < (this.pageNumber+1)) this.pageNumber = Math.ceil(this.roomListData.length/3)-1;
+    this.arrowright.toggleDisable(this.hasNextPage())
+    this.arrowleft.toggleDisable(this.hasPreviousPage())
   }
-  displayRoom(room: ILobbyRoom, id: number): void {
-    const roomField = PIXI.Sprite.from(PIXI.Loader.shared.resources["field"].texture);
-    const textName = new PIXI.Text(room.name, white);
-    const textPlayer = new PIXI.Text(`${room.playernumber} players`, subtitle);
-    const roomButton = new Button(buttonColor.GREEN, "JOIN", () => {
-      this.app.eventHandler.emit("lobby:join", room.id);
+  nextPage(): void{
+    this.pageNumber += 1;
+    this.listRooms()
+    this.pageTagNumber.text = (this.pageNumber + 1).toString()
+  }
+  hasNextPage():boolean{
+    return Math.ceil(this.roomListData.length/3) > (this.pageNumber+1 );
+  }
+  previousPage(): void{
+    this.pageNumber -= 1;
+    this.listRooms()
+    this.pageTagNumber.text = (this.pageNumber + 1).toString()
+  }
+  hasPreviousPage():boolean{
+    return this.pageNumber > 0;
+  }
+
+  listRooms(): void {
+    this.roomList.forEach(rl=>{
+      this.removeChild(rl);
+    })
+    console.log(this.roomListData)
+    this.roomList = this.roomListData.slice(this.pageNumber * 3, this.pageNumber * 3 + 3).map((rm, id) => {
+      return new LobbyRoom(this.app, this, rm, id);
     });
-    renderSprite(roomField, this, -100, id*140-180)
-    renderSprite(textName, this, -250, id*140-180)
-    renderSprite(textPlayer, this, 0, id*140-180)
-    renderSprite(roomButton, this, 270, 140*id-180)
+    this.updateNavigator();
   }
   show(): void {
     this.visible = true;
@@ -91,19 +111,24 @@ export class Lobby extends PIXI.Container {
   }
 
   appendRoom(room: ILobbyRoom): void {
-    this.roomList = [...this.roomList, room];
-    this.listRooms(this.roomList);
+    this.roomListData = [...this.roomListData, room];
+    this.listRooms();
   }
-  listRoom(data: ILobbyRoom[]): void {
-    this.roomList = data;
-    this.listRooms(this.roomList);
+  displayLobby(data: ILobbyRoom[]): void {
+    this.roomListData = data;
+    this.listRooms();
   }
   updateRoom(room: ILobbyRoom): void {
-    this.roomList = this.roomList.map((currentRoom) => {
+    this.roomListData = this.roomListData.map((currentRoom) => {
       if (currentRoom.id === room.id) return room;
       return currentRoom;
     });
-    this.listRooms(this.roomList);
+    this.listRooms();
+  }
+  deleteRoom(roomid: string) {
+    this.roomListData = this.roomListData.filter((currentRoom) => currentRoom.id !== roomid);
+    console.log(this.roomListData)
+    this.listRooms();
   }
   createRoom(name?: string): void {
     this.app.eventHandler.emit("lobby:create", name);

@@ -36,7 +36,7 @@ export class Action extends PIXI.Container {
       this.prepared = !this.prepared;
       this.room.app.eventHandler.emit("room:prepare", this.prepared);
     });
-    adjustToCenterOfContainer(this.prepareButton, 0, 150);
+    adjustToCenterOfContainer(this.prepareButton, 150, 150);
     this.addChild(this.prepareButton);
   }
 
@@ -82,6 +82,7 @@ export class Action extends PIXI.Container {
         this.callButtons.forEach((cb) => (cb.visible = false));
         this.KittyButton.visible = false;
         this.PlayButton.visible = false;
+        this.CancelButton.visible = false;
 
         break;
 

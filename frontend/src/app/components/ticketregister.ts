@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { defaultStyle, white } from "../textstyle";
+import { defaultStyle, headStyle, white } from "../textstyle";
 import { TextInput } from "../components/textinput";
 import { Button } from "../components/button";
 import { buttonColor } from "../enums/enums";
@@ -12,13 +12,14 @@ import { Ticket } from "../interfaces/ISocket";
 import { cardToName, numberToOrder } from "../helpers/helper";
 import { SelectableSprite } from "./selectableSprite";
 import { SelectableText } from "./selectableText";
+import { Card } from "./card";
 
 export class TicketRegister extends  PIXI.Container{
   input: TextInput;
   avatarIndex: number;
   callback;
-room: GameRoom;
-tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h", sequence:1},{number:"14", suit:"h", sequence:1}]
+  room: GameRoom;
+  tickets:{number?:string, suit?:string, sequence?:number}[] = [{},{}]
   app: PIXI.Application;
   labelHandler: any = [[],[]];
   suitSelectorHandler: SelectableSprite[][] =[[],[]];
@@ -42,9 +43,8 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
 
   init(): void {
     this.displayBackground();
-    this.displayTicketText(0);
+    this.displayTicketTitle();
     this.displayTicketSelector(0);
-    this.displayTicketText(1);
     this.displayTicketSelector(1);
     this.displayButton();
   }
@@ -65,22 +65,37 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
     modal.width = modalTexture.width-180;
     this.addChild(modal);
   }
-
-  displayTicketText(index : number):void{
-    this.labelHandler[index] = new PIXI.Text(`Ticket${index+1} : ${numberToOrder(this.tickets[index].sequence)} ${cardToName(this.tickets[index].suit, this.tickets[index].number)}`, defaultStyle);
-    adjustToCenterOfContainer(this.labelHandler[index], -280, index*160-190);
-    this.labelHandler[index].anchor.set(0)
-    this.addChild(this.labelHandler[index]);
+  displayTicketTitle():void{
+    this.tickets.forEach((t, index)=>{
+        const title = new PIXI.Text(`Ticket ${index+1}`, headStyle);
+        adjustToCenterOfContainer(title, -220, index*160-160);
+        this.addChild(title);
+    })
+  }
+  displayTicketPreview():void{
+    this.tickets.forEach((t, index)=>{
+      if (t.sequence!== undefined && t.number && t.suit){
+        this.removeChild(this.labelHandler[index].card)
+        this.removeChild(this.labelHandler[index].sequence)
+        const card = new Card(this.tickets[index].suit + this.tickets[index].number, "small", false)
+        const sequence = new PIXI.Text(`${numberToOrder(this.tickets[index].sequence)}`, defaultStyle);
+        adjustToCenterOfContainer(card, 210, index*160-100);
+        adjustToCenterOfContainer(sequence, 210, index*160-40);
+        this.labelHandler[index] = {card,sequence}
+        this.addChild(card);
+        this.addChild(sequence);
+      }
+    })
   }
   displayTicketSelector(index : number): void {
     const avatarsheet: PIXI.Spritesheet =
     PIXI.Loader.shared.resources["suits"].spritesheet;
     
-    this.sequenceSelectorHandler[index] = ["First", "Second", "Third", "Fourth"].map((n,id)=>{
+    this.sequenceSelectorHandler[index] = ["1st", "2nd", "3rd", "4th"].map((n,id)=>{
       const sequenceSelector: SelectableText = new SelectableText(n, defaultStyle,n, ()=>{
         this.selectSequence(index, id)
       })
-      adjustToCenterOfContainer(sequenceSelector, id*100 -250, index*160-150);
+      adjustToCenterOfContainer(sequenceSelector, id*55 - 270, index*160-130);
       sequenceSelector.anchor.set(0)
       this.addChild(sequenceSelector);
       return sequenceSelector
@@ -90,7 +105,7 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
         this.selectSuit(index, suit)
       })
       suitSelector.scale.set(0.5)
-      adjustToCenterOfContainer(suitSelector, id*30 -250 , index*160-110);
+      adjustToCenterOfContainer(suitSelector, id*40 -40, index*160-125);
       suitSelector.anchor.set(0)
       this.addChild(suitSelector);
       return suitSelector
@@ -99,7 +114,7 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
       const textSelector: SelectableText = new SelectableText(numberToName(n), defaultStyle,n, ()=>{
         this.selectText(index, n)
       })
-      adjustToCenterOfContainer(textSelector, id*30 -250, index*160-70);
+      adjustToCenterOfContainer(textSelector, id*30 -270, index*160-90);
       textSelector.anchor.set(0)
       this.addChild(textSelector);
       return textSelector
@@ -107,27 +122,27 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
   }
   selectSuit(index: number, suit:string){
     this.tickets[index].suit = suit
-    this.labelHandler[index].text = `Ticket${index+1} : ${numberToOrder(this.tickets[index].sequence)} ${cardToName(this.tickets[index].suit, this.tickets[index].number)}`
     this.suitSelectorHandler[index].forEach(ssh=>{
       if (ssh.data === suit) ssh.toggle(true)
       else ssh.toggle(false)
     })
+    this.displayTicketPreview();
   }
   selectText(index: number, number:string){
     this.tickets[index].number = number
-    this.labelHandler[index].text = `Ticket${index+1} : ${numberToOrder(this.tickets[index].sequence)} ${cardToName(this.tickets[index].suit, this.tickets[index].number)}`
     this.textSelectorHandler[index].forEach(ssh=>{
       if (ssh.data === number) ssh.toggle(true)
       else ssh.toggle(false)
     })
+    this.displayTicketPreview();
   }
   selectSequence(index: number, sequence:number){
     this.tickets[index].sequence = sequence
-    this.labelHandler[index].text = `Ticket${index+1} : ${numberToOrder(this.tickets[index].sequence)} ${cardToName(this.tickets[index].suit, this.tickets[index].number)}`
     this.sequenceSelectorHandler[index].forEach((ssh,id)=>{
       if (id === sequence) ssh.toggle(true)
       else ssh.toggle(false)
     })
+    this.displayTicketPreview();
   }
   displayButton(): void {
     const button: Button = new Button(buttonColor.GREEN,"Confirm", ()=>{
@@ -139,5 +154,5 @@ tickets:{number:string, suit:string, sequence:number}[] = [{number:"14", suit:"h
     adjustToCenterOfContainer(button, 0, 160);
     this.addChild(button);
   }
-
+  
 }

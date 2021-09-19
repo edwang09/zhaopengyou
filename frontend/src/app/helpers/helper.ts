@@ -159,7 +159,7 @@ export const getPopCardIndex = (hand: string[], picked: number[], card: string, 
 
 export const numberToOrder = (n?: number): string => {
   if (n === undefined) return "??th";
-  return ["First", "Second", "Third", "Forth"][n];
+  return ["1st", "2nd", "3rd", "4th"][n];
 };
 
 export const cardToName = (suit?: string, number?: string): string => {
@@ -200,7 +200,7 @@ export const numberToName = (number: string): string => {
     "07": "7",
     "08": "8",
     "09": "9",
-    "10": "10",
+    "10": "T",
     "11": "J",
     "12": "Q",
     "13": "K",

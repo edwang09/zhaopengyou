@@ -59,6 +59,7 @@ export class GameRoom extends PIXI.Container {
     this.dumpBoard = new DumpBoard(this.app, this);
     this.pointBoard = new PointBoard(this.app, this);
     renderContainer(this, this.app.stage);
+
   }
 
 
