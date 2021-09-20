@@ -8,7 +8,7 @@ services:
       context: ./frontend
       target: ${ENV}
       args:
-        - REACT_APP_SERVICES_HOST=/api
+        - WS=${WS}
     volumes: 
       - ./frontend:/app
       - /app/node_modules

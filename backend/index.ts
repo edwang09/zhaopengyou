@@ -4,7 +4,9 @@ import { createApplication } from "./app";
 import { InMemoryHandRepository } from "./room/hand.repository";
 import { InMemoryRoomRepository } from "./room/room.repository";
 
-const httpServer = createServer();
+const httpServer = createServer((req, res)=>{
+  res.end("test")
+});
 
 const io = createApplication(
   httpServer,
@@ -14,7 +16,6 @@ const io = createApplication(
   },
   {
     cors: {
-      // origin: ["http://localhost:1234","https://amritb.github.io/socketio-client-tool/"],
       "origin": "*",
       "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
       "preflightContinue": false,

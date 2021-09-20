@@ -5,6 +5,7 @@ FROM node:latest as build
 WORKDIR /app
 
 COPY package.json .
+COPY package-lock.json .
 
 RUN npm install
 COPY . ./
@@ -14,6 +15,7 @@ RUN npm run build
 FROM node:latest as dev
 WORKDIR /app
 COPY package.json .
+COPY package-lock.json .
 RUN npm install
 COPY . ./
 EXPOSE 80

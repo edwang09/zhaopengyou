@@ -37,9 +37,9 @@ dev:
 dev-build:
 	ENV=dev docker-compose up --build
 build-dev:
-	docker-compose build --build-arg ENV=dev
+	ENV=dev docker-compose build
 build:
-	docker-compose build --build-arg ENV=prod
+	ENV=prod docker-compose build
 push:
 	docker-compose push
 
@@ -50,5 +50,7 @@ local-clean:
 
 local-network:
 	docker network create zpy
-local-run:
-	docker run -d --network zpy --network-alias backend --name=$(BACKEND_CONTAINER) $(BACKEND_TAG) && docker run -d --network zpy --network-alias frontend --name=$(FRONTEND_CONTAINER) -p 80:80 $(FRONTEND_TAG)
+local-run-backend:
+	docker run --network zpy --network-alias backend --name=$(BACKEND_CONTAINER) -p 3000:3000 $(BACKEND_TAG) 
+local-run-frontend:
+	docker run --network zpy --network-alias frontend --name=$(FRONTEND_CONTAINER) -p 80:80 $(FRONTEND_TAG)

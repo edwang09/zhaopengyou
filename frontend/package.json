@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest --coverage --env=jsdom",
     "build": "webpack",
-    "serve-test": "http-server -p 80",
+    "serve-test": "http-server ./dist -p 80",
     "start": "webpack serve --host=0.0.0.0"
   },
   "keywords": [],
@@ -29,10 +29,12 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.171",
+    "@types/node": "^16.9.4",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
     "canvas": "^2.8.0",
     "copy-webpack-plugin": "^9.0.0",
+    "dotenv-webpack": "^7.0.3",
     "file-loader": "^6.2.0",
     "http-server": "^0.12.3",
     "jest": "^27.0.4",
